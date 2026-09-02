@@ -10,8 +10,8 @@ RUN mvn dependency:go-offline -B
 COPY src src
 RUN mvn clean package -DskipTests
 
-# Run stage
-FROM openjdk:17-jdk-slim
+# Run stage - Use Eclipse Temurin (replaces openjdk)
+FROM eclipse-temurin:17-jdk-slim
 WORKDIR /app
 
 # Copy JAR from build stage
