@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- ================================================================ -->
+<!-- 1. FULL TABLE WITH ALL ACTIONS (For Admin, HR, Security)         -->
+<!-- ================================================================ -->
+<th:block th:fragment="full-table(passes)">
+    <div class="table-responsive">
+        <table class="table table-hover table-striped align-middle" id="dataTable">
+            <thead class="table-dark">
+            <tr>
+                <th style="width:60px;">#ID</th>
+                <th style="min-width:150px;">Employee</th>
+                <th>Department</th>
+                <th>Date</th>
+                <th>Out / In</th>
+                <th>Reason</th>
+                <th>Authorized By</th>
+                <th>Status</th>
+                <th style="width:140px;">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Empty State -->
+            <tr th:if="${passes == null or passes.isEmpty()}">
+                <td colspan="9" class="text-center text-muted py-5">
+                    <i class="bi bi-inbox" style="font-size:48px;display:block;margin-bottom:10px;"></i>
+                    No records found
+                    <br><small>Try adjusting your filters or create a new request.</small>
+                </td>
+            </tr>
+
+            <!-- Data Rows -->
+            <tr th:each="p : ${passes}" th:if="${passes != null and !passes.isEmpty()}">
+                <!-- ID -->
+                <td>
+                    <strong class="text-primary">#<span th:text="${p.id}">1</span></strong>
+                </td>
+
+                <!-- Employee -->
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="avatar-sm bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center"
+                             style="width:35px;height:35px;font-weight:700;font-size:14px;flex-shrink:0;">
+                            <span th:text="${#strings.substring(p.employeeName, 0, 1)}">J</span>
+                        </div>
+                        <div>
+                            <div class="fw-semibold" th:text="${p.employeeName}">John Doe</div>
+                            <small class="text-muted" th:text="'ID: ' + ${p.employeeId}">ID: EMP001</small>
+                        </div>
+                    </div>
+                </td>
+
+                <!-- Department -->
+                <td>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary"
+                              th:text="${p.department != null ? p.department.name : 'N/A'}">IT</span>
+                </td>
+
+                <!-- Date -->
+                <td th:text="${p.passDate}">2026-08-23</td>
+
+                <!-- Out / In Time -->
+                <td>
+                    <div class="d-flex align-items-center gap-1">
+                        <span class="badge bg-primary bg-opacity-10 text-primary" th:text="${p.outTime}">10:00</span>
+                        <i class="bi bi-arrow-right text-muted"></i>
+                        <span class="badge bg-success bg-opacity-10 text-success" th:text="${p.expectedInTime}">12:00</span>
+                    </div>
+                </td>
+
+                <!-- Reason -->
+                <td>
+                        <span th:text="${p.reason}"
+                              style="display:inline-block;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                              title="${p.reason}">Client meeting at office</span>
+                </td>
+
+                <!-- Authorized By -->
+                <td>
+                    <span th:if="${p.isAuthorized()}" class="text-success fw-semibold" th:text="${p.hodName}">Dr. Rajesh</span>
+                    <span th:if="${!p.isAuthorized() and p.hodStatus.name() == 'REJECTED'}" class="text-danger">Rejected</span>
+                    <span th:if="${!p.isAuthorized() and p.hodStatus.name() == 'PENDING'}" class="text-muted">—</span>
+                </td>
+
+                <!-- Status -->
+                <td>
+                        <span th:if="${p.isAuthorized()}" class="badge bg-success">
+                            <i class="bi bi-check-circle"></i> Authorized
+                        </span>
+                    <span th:if="${!p.isAuthorized() and p.hodStatus.name() == 'REJECTED'}" class="badge bg-danger">
+                            <i class="bi bi-x-circle"></i> Rejected
+                        </span>
+                    <span th:if="${!p.isAuthorized() and p.hodStatus.name() == 'PENDING'}" class="badge bg-warning text-dark">
+                            <i class="bi bi-clock"></i> Pending HOD
+                        </span>
+                    <span th:if="${!p.isAuthorized() and p.hrStatus.name() == 'PENDING'}" class="badge bg-info text-dark">
+                            <i class="bi bi-clock"></i> Pending HR
+                        </span>
+                    <span th:if="${!p.isAuthorized() and p.securityStatus.name() == 'PENDING'}" class="badge bg-secondary">
+                            <i class="bi bi-clock"></i> Pending Security
+                        </span>
+                </td>
+
+                <!-- Action Buttons -->
+                <td>
+                    <div class="d-flex flex-wrap gap-1">
+                        <!-- View Button -->
+                        <a th:href="@{/view/{id}(id=${p.id})}" class="btn btn-sm btn-outline-primary" title="View Details">
+                            <i class="bi bi-eye"></i>
+                        </a>
+
+                        <!-- Print Button (Authorized only) -->
+                        <a th:if="${p.isAuthorized()}" th:href="@{/print/{id}(id=${p.id})}"
+                           class="btn btn-sm btn-outline-success" title="Print Pass" target="_blank">
+                            <i class="bi bi-printer"></i>
+                        </a>
+
+                        <!-- Authorize Button (HOD only) -->
+                        <form th:if="${#strings.contains(#strings.toLowerCase(#httpServletRequest.requestURI), 'authorize') and p.hodStatus.name() == 'PENDING'}"
+                              th:action="@{/authorize}" method="post" style="display:inline;">
+                            <input type="hidden" name="passId" th:value="${p.id}">
+                            <input type="hidden" name="remarks" value="Approved by HOD">
+                            <button type="submit" class="btn btn-sm btn-success" title="Authorize">
+                                <i class="bi bi-check2"></i>
+                            </button>
+                        </form>
+
+                        <!-- Reject Button (HOD only) -->
+                        <form th:if="${#strings.contains(#strings.toLowerCase(#httpServletRequest.requestURI), 'authorize') and p.hodStatus.name() == 'PENDING'}"
+                              th:action="@{/reject}" method="post" style="display:inline;">
+                            <input type="hidden" name="passId" th:value="${p.id}">
+                            <input type="hidden" name="remarks" value="Rejected by HOD">
+                            <button type="submit" class="btn btn-sm btn-danger" title="Reject">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </form>
+
+                        <!-- Verify Button (Security only) -->
+                        <button th:if="${#strings.contains(#strings.toLowerCase(#httpServletRequest.requestURI), 'security') and p.isAuthorized()}"
+                                class="btn btn-sm btn-success verify-btn"
+                                th:data-passid="${p.id}"
+                                onclick="verifyPass(this, ${p.id})" title="Verify at Gate">
+                            <i class="bi bi-check2-circle"></i>
+                        </button>
+                    </div>
+                    <div class="text-muted small mt-1" style="font-size:10px;">No Delete</div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Table Footer with Pagination Info -->
+    <div th:if="${passes != null and !passes.isEmpty()}" class="d-flex justify-content-between align-items-center mt-3">
+        <span class="text-muted small">
+            Showing <strong th:text="${passes.size()}">0</strong> records
+        </span>
+        <span class="text-muted small">
+            <i class="bi bi-info-circle"></i> No delete option available
+        </span>
+    </div>
+</th:block>
+
+<!-- ================================================================ -->
+<!-- 2. SIMPLE TABLE (For Dashboard Recent Requests)                  -->
+<!-- ================================================================ -->
+<th:block th:fragment="simple-table(passes)">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Employee</th>
+                <th>Department</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${passes == null or passes.isEmpty()}">
+                <td colspan="6" class="text-center text-muted py-4">
+                    <i class="bi bi-inbox" style="font-size:32px;display:block;"></i>
+                    No requests found
+                </td>
+            </tr>
+            <tr th:each="p : ${passes}" th:if="${passes != null and !passes.isEmpty()}">
+                <td><span class="text-primary" th:text="'#' + ${p.id}">#1</span></td>
+                <td>
+                    <div class="fw-semibold" th:text="${p.employeeName}">John Doe</div>
+                    <small class="text-muted" th:text="'ID: ' + ${p.employeeId}">EMP001</small>
+                </td>
+                <td>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary"
+                              th:text="${p.department != null ? p.department.name : 'N/A'}">IT</span>
+                </td>
+                <td th:text="${p.passDate}">2026-08-23</td>
+                <td>
+                        <span th:if="${p.isAuthorized()}" class="badge bg-success">
+                            <i class="bi bi-check-circle"></i> Authorized
+                        </span>
+                    <span th:if="${!p.isAuthorized() and p.hodStatus.name() == 'REJECTED'}" class="badge bg-danger">
+                            <i class="bi bi-x-circle"></i> Rejected
+                        </span>
+                    <span th:if="${!p.isAuthorized() and p.hodStatus.name() == 'PENDING'}" class="badge bg-warning text-dark">
+                            <i class="bi bi-clock"></i> Pending
+                        </span>
+                </td>
+                <td>
+                    <a th:href="@{/view/{id}(id=${p.id})}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-eye"></i> View
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</th:block>
+
+<!-- ================================================================ -->
+<!-- 3. COMPACT TABLE (For Mobile/Widget Views)                       -->
+<!-- ================================================================ -->
+<th:block th:fragment="compact-table(passes)">
+    <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>Employee</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${passes == null or passes.isEmpty()}">
+                <td colspan="4" class="text-center text-muted py-3">No records</td>
+            </tr>
+            <tr th:each="p : ${passes}" th:if="${passes != null and !passes.isEmpty()}">
+                <td th:text="'#' + ${p.id}">#1</td>
+                <td th:text="${p.employeeName}">John Doe</td>
+                <td>
+                    <span th:if="${p.isAuthorized()}" class="badge bg-success">✅</span>
+                    <span th:if="${!p.isAuthorized()}" class="badge bg-warning text-dark">⏳</span>
+                </td>
+                <td>
+                    <a th:href="@{/view/{id}(id=${p.id})}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</th:block>
+
+<!-- ================================================================ -->
+<!-- 4. APPROVAL TABLE (For HOD Authorization Page)                   -->
+<!-- ================================================================ -->
+<th:block th:fragment="approval-table(pendingPasses)">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-warning">
+            <tr>
+                <th style="width:60px;">#</th>
+                <th>Employee</th>
+                <th>Department</th>
+                <th>Date</th>
+                <th>Out / In</th>
+                <th>Reason</th>
+                <th style="width:180px;">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${pendingPasses == null or pendingPasses.isEmpty()}">
+                <td colspan="7" class="text-center text-muted py-4">
+                    <i class="bi bi-check-circle" style="font-size:40px;display:block;color:#28a745;"></i>
+                    No pending requests for your department!
+                    <br><small>All requests have been processed.</small>
+                </td>
+            </tr>
+            <tr th:each="p : ${pendingPasses}" th:if="${pendingPasses != null and !pendingPasses.isEmpty()}">
+                <td><span class="text-warning fw-bold" th:text="'#' + ${p.id}">#1</span></td>
+                <td>
+                    <div class="fw-semibold" th:text="${p.employeeName}">John Doe</div>
+                    <small class="text-muted" th:text="'ID: ' + ${p.employeeId}">EMP001</small>
+                </td>
+                <td>
+                    <span class="badge bg-secondary" th:text="${p.department != null ? p.department.name : 'N/A'}">IT</span>
+                </td>
+                <td th:text="${p.passDate}">2026-08-23</td>
+                <td>
+                    <span class="badge bg-primary bg-opacity-10 text-primary" th:text="${p.outTime}">10:00</span>
+                    <i class="bi bi-arrow-right text-muted mx-1"></i>
+                    <span class="badge bg-success bg-opacity-10 text-success" th:text="${p.expectedInTime}">12:00</span>
+                </td>
+                <td>
+                        <span th:text="${p.reason}"
+                              style="display:inline-block;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                              title="${p.reason}">Client meeting</span>
+                </td>
+                <td>
+                    <div class="d-flex gap-1 flex-wrap">
+                        <!-- Authorize Form -->
+                        <form th:action="@{/authorize}" method="post" style="display:inline;">
+                            <input type="hidden" name="passId" th:value="${p.id}">
+                            <input type="hidden" name="remarks" value="Approved by HOD">
+                            <button type="submit" class="btn btn-sm btn-success">
+                                <i class="bi bi-check2"></i> Approve
+                            </button>
+                        </form>
+
+                        <!-- Reject Form -->
+                        <form th:action="@{/reject}" method="post" style="display:inline;">
+                            <input type="hidden" name="passId" th:value="${p.id}">
+                            <input type="hidden" name="remarks" value="Rejected by HOD">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="bi bi-x"></i> Reject
+                            </button>
+                        </form>
+
+                        <!-- View Details -->
+                        <a th:href="@{/view/{id}(id=${p.id})}" class="btn btn-sm btn-outline-secondary" title="View Details">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</th:block>
+
+<!-- ================================================================ -->
+<!-- 5. VERIFICATION TABLE (For Security Dashboard)                   -->
+<!-- ================================================================ -->
+<th:block th:fragment="verification-table(authorizedPasses)">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-success">
+            <tr>
+                <th>#</th>
+                <th>Employee</th>
+                <th>Department</th>
+                <th>Date</th>
+                <th>Out / In</th>
+                <th>Authorized By</th>
+                <th style="width:150px;">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${authorizedPasses == null or authorizedPasses.isEmpty()}">
+                <td colspan="7" class="text-center text-muted py-4">
+                    <i class="bi bi-shield-check" style="font-size:40px;display:block;"></i>
+                    No authorized passes to verify
+                </td>
+            </tr>
+            <tr th:each="p : ${authorizedPasses}" th:if="${authorizedPasses != null and !authorizedPasses.isEmpty()}">
+                <td><span class="text-success fw-bold" th:text="'#' + ${p.id}">#1</span></td>
+                <td>
+                    <div class="fw-semibold" th:text="${p.employeeName}">John Doe</div>
+                    <small class="text-muted" th:text="'ID: ' + ${p.employeeId}">EMP001</small>
+                </td>
+                <td>
+                    <span class="badge bg-secondary" th:text="${p.department != null ? p.department.name : 'N/A'}">IT</span>
+                </td>
+                <td th:text="${p.passDate}">2026-08-23</td>
+                <td>
+                    <span class="badge bg-primary bg-opacity-10 text-primary" th:text="${p.outTime}">10:00</span>
+                    <i class="bi bi-arrow-right text-muted mx-1"></i>
+                    <span class="badge bg-success bg-opacity-10 text-success" th:text="${p.expectedInTime}">12:00</span>
+                </td>
+                <td>
+                    <span class="text-success" th:text="${p.hodName}">Dr. Rajesh</span>
+                </td>
+                <td>
+                    <div class="d-flex gap-1 flex-wrap">
+                        <button class="btn btn-sm btn-success verify-btn"
+                                th:data-passid="${p.id}"
+                                onclick="verifyPass(this, ${p.id})">
+                            <i class="bi bi-check2-circle"></i> Verify
+                        </button>
+                        <a th:href="@{/view/{id}(id=${p.id})}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a th:href="@{/print/{id}(id=${p.id})}" class="btn btn-sm btn-outline-success" target="_blank">
+                            <i class="bi bi-printer"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</th:block>
+
+<!-- ================================================================ -->
+<!-- 6. MY REQUESTS TABLE (For Employee)                              -->
+<!-- ================================================================ -->
+<th:block th:fragment="my-requests-table(myRequests)">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-info">
+            <tr>
+                <th style="width:60px;">#</th>
+                <th>Date</th>
+                <th>Out / In</th>
+                <th>Department</th>
+                <th>Reason</th>
+                <th>Authorized By</th>
+                <th>Status</th>
+                <th style="width:120px;">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${myRequests == null or myRequests.isEmpty()}">
+                <td colspan="8" class="text-center text-muted py-4">
+                    <i class="bi bi-inbox" style="font-size:40px;display:block;"></i>
+                    You haven't submitted any requests yet.
+                    <br><a href="/apply" class="btn btn-sm btn-primary mt-2">Apply Now</a>
+                </td>
+            </tr>
+            <tr th:each="p : ${myRequests}" th:if="${myRequests != null and !myRequests.isEmpty()}">
+                <td><span class="text-info fw-bold" th:text="'#' + ${p.id}">#1</span></td>
+                <td th:text="${p.passDate}">2026-08-23</td>
+                <td>
+                    <span class="badge bg-primary bg-opacity-10 text-primary" th:text="${p.outTime}">10:00</span>
+                    <i class="bi bi-arrow-right text-muted mx-1"></i>
+                    <span class="badge bg-success bg-opacity-10 text-success" th:text="${p.expectedInTime}">12:00</span>
+                </td>
+                <td>
+                    <span class="badge bg-secondary" th:text="${p.department != null ? p.department.name : 'N/A'}">IT</span>
+                </td>
+                <td>
+                        <span th:text="${p.reason}"
+                              style="display:inline-block;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                              title="${p.reason}">Client meeting</span>
+                </td>
+                <td>
+                    <span th:if="${p.isAuthorized()}" th:text="${p.hodName}">Dr. Rajesh</span>
+                    <span th:if="${!p.isAuthorized()}" class="text-muted">—</span>
+                </td>
+                <td>
+                        <span th:if="${p.isAuthorized()}" class="badge bg-success">
+                            <i class="bi bi-check-circle"></i> Authorized
+                        </span>
+                    <span th:if="${!p.isAuthorized() and p.hodStatus.name() == 'REJECTED'}" class="badge bg-danger">
+                            <i class="bi bi-x-circle"></i> Rejected
+                        </span>
+                    <span th:if="${!p.isAuthorized() and p.hodStatus.name() == 'PENDING'}" class="badge bg-warning text-dark">
+                            <i class="bi bi-clock"></i> Pending
+                        </span>
+                </td>
+                <td>
+                    <div class="d-flex gap-1">
+                        <a th:href="@{/view/{id}(id=${p.id})}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a th:if="${p.isAuthorized()}" th:href="@{/print/{id}(id=${p.id})}"
+                           class="btn btn-sm btn-outline-success" target="_blank">
+                            <i class="bi bi-printer"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</th:block>
+
+<!-- ================================================================ -->
+<!-- 7. STATS TABLE (For Admin Dashboard Summary)                     -->
+<!-- ================================================================ -->
+<th:block th:fragment="stats-table(passes)">
+    <div class="table-responsive">
+        <table class="table table-bordered table-sm">
+            <thead class="table-dark">
+            <tr>
+                <th>Metric</th>
+                <th class="text-center">Count</th>
+                <th class="text-center">Percentage</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Total Requests</td>
+                <td class="text-center fw-bold" th:text="${passes != null ? passes.size() : 0}">0</td>
+                <td class="text-center">100%</td>
+            </tr>
+            <tr class="table-success">
+                <td>✅ Authorized</td>
+                <td class="text-center fw-bold text-success"
+                    th:text="${passes != null ? #lists.size(#lists.filter(passes, p -> p.isAuthorized())) : 0}">0</td>
+                <td class="text-center"
+                    th:text="${passes != null and !passes.isEmpty() ? #numbers.formatDecimal((#lists.size(#lists.filter(passes, p -> p.isAuthorized())) * 100.0 / passes.size()), 1, 1) + '%' : '0%'}">0%</td>
+            </tr>
+            <tr class="table-warning">
+                <td>⏳ Pending</td>
+                <td class="text-center fw-bold text-warning"
+                    th:text="${passes != null ? #lists.size(#lists.filter(passes, p -> p.isPending())) : 0}">0</td>
+                <td class="text-center"
+                    th:text="${passes != null and !passes.isEmpty() ? #numbers.formatDecimal((#lists.size(#lists.filter(passes, p -> p.isPending())) * 100.0 / passes.size()), 1, 1) + '%' : '0%'}">0%</td>
+            </tr>
+            <tr class="table-danger">
+                <td>❌ Rejected</td>
+                <td class="text-center fw-bold text-danger"
+                    th:text="${passes != null ? #lists.size(#lists.filter(passes, p -> p.overallStatus.name() == 'REJECTED')) : 0}">0</td>
+                <td class="text-center"
+                    th:text="${passes != null and !passes.isEmpty() ? #numbers.formatDecimal((#lists.size(#lists.filter(passes, p -> p.overallStatus.name() == 'REJECTED')) * 100.0 / passes.size()), 1, 1) + '%' : '0%'}">0%</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</th:block>
+
+<!-- ================================================================ -->
+<!-- JAVASCRIPT - Verification Function                                -->
+<!-- ================================================================ -->
+<script>
+    function verifyPass(button, passId) {
+        if (confirm('✅ Verify this out pass at the gate?\n\nEmployee: ' +
+                    button.closest('tr').querySelector('td:nth-child(2) .fw-semibold')?.innerText || 'Unknown')) {
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-check-circle"></i> Verified ✓';
+            button.className = 'btn btn-sm btn-success verify-btn';
+            button.disabled = true;
+            button.style.opacity = '0.7';
+
+            // Log verification
+            console.log('✅ Pass #' + passId + ' verified at gate on ' + new Date().toLocaleString());
+
+            // Optional: Send verification to server
+            // fetch('/api/verify/' + passId, { method: 'POST' })
+            //     .then(response => response.json())
+            //     .then(data => console.log('Verification saved:', data));
+        }
+    }
+</script>
+
+</body>
+</html>

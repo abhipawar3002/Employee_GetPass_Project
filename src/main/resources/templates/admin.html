@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - OutPass System</title>
+    <!-- ===== ABtech Favicon ===== -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 260px;
+            background: linear-gradient(180deg, #0f1a30 0%, #1a2d4a 50%, #17365d 100%);
+            color: white;
+            padding: 20px 0;
+            transition: all 0.3s;
+            z-index: 1000;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+        }
+
+        /* ✅ ABtech Logo Styles */
+        .sidebar .brand {
+            padding: 0 20px 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+        }
+
+        .sidebar .brand .logo-text {
+            font-size: 28px;
+            font-weight: 900;
+            color: white;
+            letter-spacing: 1px;
+            line-height: 1;
+        }
+
+        .sidebar .brand .logo-text .highlight {
+            color: #ffc107;
+        }
+
+        .sidebar .brand .logo-tagline {
+            font-size: 8px;
+            letter-spacing: 4px;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        .sidebar .brand .brand-sub {
+            font-weight: 300;
+            font-size: 11px;
+            opacity: 0.6;
+            text-align: center;
+            margin-top: 2px;
+        }
+
+        .sidebar .menu-label {
+            padding: 15px 20px 8px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.4;
+            font-weight: 600;
+        }
+        .sidebar .nav-item {
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 13px;
+        }
+        .sidebar .nav-item:hover {
+            background: rgba(255,255,255,0.05);
+            color: white;
+            border-left-color: #ffc107;
+        }
+        .sidebar .nav-item.active {
+            background: rgba(255,193,7,0.1);
+            color: #ffc107;
+            border-left-color: #ffc107;
+        }
+        .sidebar .nav-item i { font-size: 17px; width: 22px; }
+        .sidebar .nav-item .badge-count {
+            margin-left: auto;
+            background: #ffc107;
+            color: #17365d;
+            padding: 2px 9px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .sidebar .user-card {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 15px 20px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            background: rgba(0,0,0,0.2);
+        }
+        .sidebar .user-card .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #ffc107;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #17365d;
+            font-size: 14px;
+        }
+        .sidebar .user-card .user-info { flex: 1; }
+        .sidebar .user-card .user-info .name { font-weight: 600; font-size: 13px; }
+        .sidebar .user-card .user-info .role { font-size: 11px; opacity: 0.6; }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 20px 30px;
+            min-height: 100vh;
+        }
+
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+        }
+        .top-header .page-title h4 {
+            font-weight: 700;
+            color: #17365d;
+            margin: 0;
+            font-size: 18px;
+        }
+        .top-header .page-title p {
+            font-size: 12px;
+            color: #888;
+            margin: 0;
+        }
+        .top-header .header-actions .btn-logout {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .top-header .header-actions .btn-logout:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            transition: all 0.3s;
+            border: 1px solid #f0f4f8;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border-color: #17365d;
+        }
+        .stat-card .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .stat-card .stat-icon.blue { background: #e8edf5; color: #17365d; }
+        .stat-card .stat-icon.yellow { background: #fff3cd; color: #ffc107; }
+        .stat-card .stat-icon.green { background: #d4edda; color: #28a745; }
+        .stat-card .stat-icon.red { background: #f8d7da; color: #dc3545; }
+        .stat-card .stat-number {
+            font-size: 28px;
+            font-weight: 800;
+            color: #17365d;
+            line-height: 1.2;
+        }
+        .stat-card .stat-label {
+            font-size: 13px;
+            color: #888;
+            font-weight: 500;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            margin-bottom: 25px;
+            border: none;
+            display: none;
+        }
+        .section-card.active {
+            display: block;
+        }
+        .section-card .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f4f8;
+        }
+        .section-card .section-header h5 {
+            font-weight: 700;
+            color: #17365d;
+            margin: 0;
+            font-size: 15px;
+        }
+
+        .table-custom {
+            width: 100%;
+            font-size: 13px;
+        }
+        .table-custom thead th {
+            background: #f8f9fa;
+            color: #17365d;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 10px 12px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .table-custom tbody td {
+            padding: 10px 12px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f0f4f8;
+        }
+        .table-custom tbody tr:hover { background: #f8f9fa; }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .status-badge.success { background: #d4edda; color: #28a745; }
+        .status-badge.warning { background: #fff3cd; color: #ffc107; }
+        .status-badge.danger { background: #f8d7da; color: #dc3545; }
+        .status-badge.secondary { background: #e9ecef; color: #495057; }
+
+        .no-data { text-align: center; padding: 30px; color: #888; }
+        .no-data i { font-size: 36px; display: block; margin-bottom: 10px; opacity: 0.3; }
+
+        .dept-card {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 10px;
+            border-left: 4px solid #17365d;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .dept-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .dept-card .dept-name {
+            font-weight: 600;
+            font-size: 16px;
+            color: #17365d;
+        }
+        .dept-card .dept-details {
+            color: #666;
+            font-size: 13px;
+        }
+        .dept-card .head-assigned {
+            color: #28a745;
+            font-weight: 600;
+        }
+        .dept-card .head-not-assigned {
+            color: #ffc107;
+            font-weight: 600;
+        }
+
+        .role-tag {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .role-tag.ADMIN { background: #dc3545; color: white; }
+        .role-tag.HOD { background: #ffc107; color: #333; }
+        .role-tag.HR { background: #17a2b8; color: white; }
+        .role-tag.EMPLOYEE { background: #28a745; color: white; }
+        .role-tag.SECURITY { background: #6c757d; color: white; }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #28a745;
+        }
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .form-label-sm { font-size: 12px; font-weight: 600; color: #555; margin-bottom: 3px; }
+
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            background: #17365d;
+            color: white;
+            border-radius: 12px 12px 0 0;
+        }
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+        .modal-footer .btn-primary {
+            background: #17365d;
+            border-color: #17365d;
+        }
+        .modal-footer .btn-primary:hover {
+            background: #0f2744;
+            border-color: #0f2744;
+        }
+
+        .filter-section {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .filter-section .form-label-sm { font-size: 11px; font-weight: 600; color: #555; margin-bottom: 2px; }
+
+        .btn-sm { font-size: 12px; padding: 4px 10px; }
+
+        /* View Modal Styles */
+        .detail-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f4f8;
+        }
+        .detail-item label {
+            display: block;
+            margin-bottom: 2px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .detail-item div {
+            font-size: 14px;
+        }
+        .modal-header-view {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            border-radius: 12px 12px 0 0;
+        }
+        .modal-header-view .btn-close {
+            filter: brightness(0) invert(1);
+        }
+        .approval-timeline-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            background: white;
+        }
+        .approval-timeline-item .icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .approval-timeline-item .icon.approved { background: #d4edda; color: #28a745; }
+        .approval-timeline-item .icon.rejected { background: #f8d7da; color: #dc3545; }
+        .approval-timeline-item .icon.pending { background: #fff3cd; color: #856404; }
+        .approval-timeline-item .icon.waiting { background: #e9ecef; color: #6c757d; }
+
+        /* Mobile Toggle */
+        .mobile-toggle {
+            display: none;
+            background: #17365d;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 18px;
+        }
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        .sidebar-overlay.active { display: block; }
+
+        @media (max-width: 1200px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); width: 260px; }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 15px; }
+            .mobile-toggle { display: flex !important; }
+        }
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .top-header { flex-direction: column; align-items: start; gap: 10px; }
+        }
+
+        .sidebar::-webkit-scrollbar { width: 3px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<div class="sidebar" id="sidebar">
+    <!-- ✅ ABtech Logo -->
+    <div class="brand">
+        <div style="text-align: center; padding: 10px 0 5px 0;">
+            <div style="font-size: 28px; font-weight: 900; color: white; letter-spacing: 1px; line-height: 1;">
+                AB<span style="color: #ffc107;">tech</span>
+            </div>
+            <div style="font-size: 8px; letter-spacing: 4px; color: rgba(255, 255, 255, 0.4); text-transform: uppercase; margin-top: 2px;">
+                BUILD • CODE • GROW
+            </div>
+        </div>
+        <div style="font-weight: 300; font-size: 11px; opacity: 0.6; text-align: center; margin-top: 2px;">
+            Enterprise Management
+        </div>
+    </div>
+
+    <div class="menu-label">Main</div>
+    <a href="/admin/dashboard?tab=dashboard" class="nav-item" th:classappend="${activeTab == 'dashboard' ? 'active' : ''}">
+        <i class="bi bi-grid-1x2-fill"></i> Dashboard
+    </a>
+
+    <div class="menu-label">Management</div>
+    <a href="/admin/dashboard?tab=users" class="nav-item" th:classappend="${activeTab == 'users' ? 'active' : ''}">
+        <i class="bi bi-people"></i> User Management
+        <span class="badge-count" th:text="${userCount != null ? userCount : 0}">0</span>
+    </a>
+    <a href="/admin/dashboard?tab=departments" class="nav-item" th:classappend="${activeTab == 'departments' ? 'active' : ''}">
+        <i class="bi bi-building"></i> Departments
+    </a>
+
+    <div class="user-card">
+        <div class="d-flex align-items-center gap-3">
+            <div class="avatar">
+                <span th:text="${#strings.substring(loggedInUser.fullName, 0, 1)}">A</span>
+            </div>
+            <div class="user-info">
+                <div class="name" th:text="${loggedInUser.fullName}">Admin</div>
+                <div class="role">Administrator</div>
+            </div>
+            <a href="/logout" class="text-white" style="opacity:0.6; font-size:18px;">
+                <i class="bi bi-box-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ===== OVERLAY ===== -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="main-content">
+
+    <!-- ===== TOP HEADER ===== -->
+    <div class="top-header">
+        <div class="d-flex align-items-center gap-3">
+            <button class="mobile-toggle" onclick="toggleSidebar()">
+                <i class="bi bi-list"></i>
+            </button>
+            <div class="page-title" id="pageTitle">
+                <h4><i class="bi bi-speedometer2"></i> Admin Dashboard</h4>
+                <p id="pageSubtitle">Welcome back, <strong th:text="${loggedInUser.fullName}">Admin</strong>!</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <a href="/logout" class="btn-logout">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ===== DASHBOARD TAB ===== -->
+    <!-- ============================================================ -->
+    <div id="section-dashboard" class="section-card" th:classappend="${activeTab == 'dashboard' ? 'active' : ''}">
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon blue"><i class="bi bi-clipboard"></i></div>
+                <div class="stat-number" th:text="${totalCount != null ? totalCount : 0}">0</div>
+                <div class="stat-label">Total Requests</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon yellow"><i class="bi bi-clock-history"></i></div>
+                <div class="stat-number" th:text="${pendingCount != null ? pendingCount : 0}">0</div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green"><i class="bi bi-check-circle"></i></div>
+                <div class="stat-number" th:text="${approvedCount != null ? approvedCount : 0}">0</div>
+                <div class="stat-label">Authorized</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon red"><i class="bi bi-x-circle"></i></div>
+                <div class="stat-number" th:text="${rejectedCount != null ? rejectedCount : 0}">0</div>
+                <div class="stat-label">Rejected</div>
+            </div>
+        </div>
+
+        <!-- All Requests Table -->
+        <div class="section-header" style="margin-top: 20px;">
+            <h5><i class="bi bi-list-ul"></i> All Requests</h5>
+            <div>
+                <span class="badge bg-primary me-1" th:text="${totalCount != null ? totalCount : 0} + ' Total'">0</span>
+                <span class="badge bg-warning text-dark me-1" th:text="${pendingCount != null ? pendingCount : 0} + ' Pending'">0</span>
+                <span class="badge bg-success me-1" th:text="${approvedCount != null ? approvedCount : 0} + ' Authorized'">0</span>
+                <span class="badge bg-danger" th:text="${rejectedCount != null ? rejectedCount : 0} + ' Rejected'">0</span>
+            </div>
+        </div>
+
+        <!-- FILTERS -->
+        <div class="filter-section">
+            <form action="/admin/dashboard" method="get" id="filterForm">
+                <div class="row g-2">
+                    <div class="col-md-2">
+                        <label class="form-label-sm">From Date</label>
+                        <input type="date" name="fromDate" class="form-control form-control-sm"
+                               th:value="${filterFromDate}" onchange="document.getElementById('filterForm').submit()">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label-sm">To Date</label>
+                        <input type="date" name="toDate" class="form-control form-control-sm"
+                               th:value="${filterToDate}" onchange="document.getElementById('filterForm').submit()">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label-sm">Status</label>
+                        <select name="status" class="form-select form-select-sm" onchange="document.getElementById('filterForm').submit()">
+                            <option value="">All Status</option>
+                            <option value="APPROVED" th:selected="${filterStatus == 'APPROVED'}">✅ Authorized</option>
+                            <option value="PENDING_HOD" th:selected="${filterStatus == 'PENDING_HOD'}">⏳ Pending</option>
+                            <option value="REJECTED" th:selected="${filterStatus == 'REJECTED'}">❌ Rejected</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label-sm">Department</label>
+                        <select name="department" class="form-select form-select-sm" onchange="document.getElementById('filterForm').submit()">
+                            <option value="">All Departments</option>
+                            <option th:each="d : ${departments}"
+                                    th:value="${d.name}"
+                                    th:text="${d.name}"
+                                    th:selected="${filterDepartment == d.name}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label-sm">&nbsp;</label>
+                        <a href="/admin/dashboard" class="btn btn-sm btn-secondary w-100">
+                            <i class="bi bi-arrow-counterclockwise"></i> Clear
+                        </a>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label-sm">&nbsp;</label>
+                        <a th:href="@{/admin/export/excel(fromDate=${filterFromDate}, toDate=${filterToDate}, status=${filterStatus}, department=${filterDepartment})}"
+                           class="btn btn-sm btn-success w-100">
+                            <i class="bi bi-file-earmark-excel"></i> Export
+                        </a>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-12 text-end">
+                        <span class="text-muted small">Showing <strong th:text="${totalCount != null ? totalCount : 0}">0</strong> records</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive">
+            <table class="table-custom" id="requestTable">
+                <thead>
+                <tr>
+                    <th style="width:60px;">#ID</th>
+                    <th>Employee</th>
+                    <th>Department</th>
+                    <th>Date</th>
+                    <th>Out / In</th>
+                    <th>Reason</th>
+                    <th>HOD Status</th>
+                    <th>HR Status</th>
+                    <th style="width:120px;">Action</th>
+                </tr>
+                </thead>
+                <tbody id="requestList">
+                <tr th:if="${allPasses == null or allPasses.isEmpty()}">
+                    <td colspan="9" class="no-data">
+                        <i class="bi bi-inbox"></i>
+                        No OutPass requests found
+                    </td>
+                </tr>
+                <tr th:each="p : ${allPasses}" th:if="${allPasses != null and !allPasses.isEmpty()}">
+                    <td><strong>#<span th:text="${p.id}">1</span></strong></td>
+                    <td>
+                        <strong th:text="${p.employeeName}">John Doe</strong>
+                        <br><small class="text-muted" th:text="'ID: ' + ${p.employeeId}">EMP001</small>
+                    </td>
+                    <td th:text="${p.department != null ? p.department.name : 'N/A'}">IT</td>
+                    <td th:text="${p.passDate}">2026-08-23</td>
+                    <td>
+                        <span class="text-primary" th:text="${p.outTime}">10:00</span>
+                        <i class="bi bi-arrow-right"></i>
+                        <span class="text-success" th:text="${p.expectedInTime}">12:00</span>
+                    </td>
+                    <td th:text="${p.reason}" style="max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${p.reason}">Client meeting</td>
+
+                    <!-- HOD Status -->
+                    <td>
+                        <span th:if="${p.hodStatus != null and p.hodStatus.name() == 'APPROVED'}" class="status-badge success">
+                            <i class="bi bi-check-circle"></i> Approved
+                        </span>
+                        <span th:if="${p.hodStatus != null and p.hodStatus.name() == 'REJECTED'}" class="status-badge danger">
+                            <i class="bi bi-x-circle"></i> Rejected
+                        </span>
+                        <span th:if="${p.hodStatus != null and p.hodStatus.name() == 'PENDING'}" class="status-badge warning">
+                            <i class="bi bi-clock"></i> Pending
+                        </span>
+                        <span th:if="${p.hodStatus == null or p.hodStatus.name() == 'WAITING'}" class="status-badge secondary">
+                            Waiting
+                        </span>
+                    </td>
+
+                    <!-- HR Status -->
+                    <td>
+                        <span th:if="${p.hrStatus != null and p.hrStatus.name() == 'APPROVED'}" class="status-badge success">
+                            <i class="bi bi-check-circle"></i> Approved
+                        </span>
+                        <span th:if="${p.hrStatus != null and p.hrStatus.name() == 'REJECTED'}" class="status-badge danger">
+                            <i class="bi bi-x-circle"></i> Rejected
+                        </span>
+                        <span th:if="${p.hrStatus != null and p.hrStatus.name() == 'PENDING'}" class="status-badge warning">
+                            <i class="bi bi-clock"></i> Pending
+                        </span>
+                        <span th:if="${p.hrStatus == null or p.hrStatus.name() == 'WAITING'}" class="status-badge secondary">
+                            Waiting
+                        </span>
+                    </td>
+
+                    <td>
+                        <div class="d-flex flex-wrap gap-1">
+                            <!-- View -->
+                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#viewModal"
+                                    th:data-passid="${p.id}"
+                                    th:data-employee="${p.employeeName}"
+                                    th:data-employeeid="${p.employeeId}"
+                                    th:data-date="${p.passDate}"
+                                    th:data-outtime="${p.outTime}"
+                                    th:data-intime="${p.expectedInTime}"
+                                    th:data-department="${p.department != null ? p.department.name : 'N/A'}"
+                                    th:data-reason="${p.reason}"
+                                    th:data-status="${p.overallStatus}"
+                                    th:data-hodstatus="${p.hodStatus}"
+                                    th:data-hodname="${p.hodName}"
+                                    th:data-hodremarks="${p.hodRemarks}"
+                                    th:data-hrstatus="${p.hrStatus}"
+                                    th:data-hrname="${p.hrName}"
+                                    th:data-hrremarks="${p.hrRemarks}"
+                                    th:data-securitystatus="${p.securityStatus}"
+                                    th:data-securityname="${p.securityName}"
+                                    th:data-securityremarks="${p.securityRemarks}"
+                                    onclick="openViewModal(this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-3" th:if="${allPasses != null and !allPasses.isEmpty()}">
+            <span class="text-muted small">Showing <strong id="visibleCount">0</strong> records</span>
+            <nav>
+                <ul class="pagination pagination-sm mb-0" id="paginationControls">
+                    <li class="page-item disabled"><a class="page-link" href="#" onclick="changePage(-1)">Previous</a></li>
+                    <li class="page-item active"><a class="page-link" href="#" onclick="goToPage(1)">1</a></li>
+                    <li class="page-item disabled"><a class="page-link" href="#" onclick="changePage(1)">Next</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ===== USER MANAGEMENT TAB ===== -->
+    <!-- ============================================================ -->
+    <div id="section-users" class="section-card" th:classappend="${activeTab == 'users' ? 'active' : ''}">
+        <div class="section-header">
+            <h5><i class="bi bi-people"></i> User Management</h5>
+            <span class="badge bg-secondary" th:text="${userCount != null ? userCount : 0} + ' users'">0</span>
+        </div>
+
+        <div th:if="${userSuccess}" class="alert alert-success" th:text="${userSuccess}"></div>
+        <div th:if="${userError}" class="alert alert-danger" th:text="${userError}"></div>
+
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> <strong>Admin Only:</strong> Add new users to the system.
+        </div>
+
+        <!-- Add User Form -->
+        <form th:action="@{/admin/users/add}" method="post" class="row g-2 mb-3">
+            <div class="col-md-2">
+                <label class="form-label-sm">Username *</label>
+                <input type="text" name="username" class="form-control form-control-sm" placeholder="Username" required>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label-sm">Password *</label>
+                <input type="password" name="password" class="form-control form-control-sm" placeholder="Password" required>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label-sm">Full Name *</label>
+                <input type="text" name="fullName" class="form-control form-control-sm" placeholder="Full Name" required>
+            </div>
+            <div class="col-md-1">
+                <label class="form-label-sm">Emp ID</label>
+                <input type="text" name="employeeId" class="form-control form-control-sm" placeholder="ID">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label-sm">Role *</label>
+                <select name="role" class="form-select form-select-sm" required>
+                    <option value="">Select</option>
+                    <option value="ADMIN">Admin</option>
+                    <option value="HOD">HOD</option>
+                    <option value="HR">HR</option>
+                    <option value="EMPLOYEE">Employee</option>
+                    <option value="SECURITY">Security</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <label class="form-label-sm">Dept</label>
+                <select name="department" class="form-select form-select-sm">
+                    <option value="">Select</option>
+                    <option th:each="d : ${departments}" th:value="${d.name}" th:text="${d.name}"></option>
+                </select>
+            </div>
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-circle"></i> Add User
+                </button>
+            </div>
+        </form>
+
+        <!-- Users Table -->
+        <div class="table-responsive">
+            <table class="table-custom">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Full Name</th>
+                    <th>Department</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${users == null or users.isEmpty()}">
+                    <td colspan="7" class="no-data">
+                        <i class="bi bi-people"></i>
+                        No users found. Add your first user above!
+                    </td>
+                </tr>
+                <tr th:each="u : ${users}">
+                    <td th:text="${u.id}">1</td>
+                    <td><strong th:text="${u.username}">admin</strong></td>
+                    <td th:text="${u.fullName}">Admin</td>
+                    <td th:text="${u.department != null ? u.department.name : 'N/A'}">IT</td>
+                    <td>
+                        <span class="role-tag" th:classappend="${u.role.name()}" th:text="${u.role.name()}">ADMIN</span>
+                    </td>
+                    <td>
+                        <span th:if="${u.active}" class="badge bg-success">Active</span>
+                        <span th:if="${!u.active}" class="badge bg-danger">Inactive</span>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a th:if="${u.active and u.username != 'admin'}" th:href="@{/admin/users/deactivate/{id}(id=${u.id})}"
+                               class="btn btn-sm btn-outline-danger" onclick="return confirm('Deactivate this user?')">
+                                <i class="bi bi-ban"></i>
+                            </a>
+                            <a th:if="${!u.active}" th:href="@{/admin/users/activate/{id}(id=${u.id})}"
+                               class="btn btn-sm btn-outline-success">
+                                <i class="bi bi-check-circle"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ===== DEPARTMENTS TAB ===== -->
+    <!-- ============================================================ -->
+    <div id="section-departments" class="section-card" th:classappend="${activeTab == 'departments' ? 'active' : ''}">
+        <div class="section-header">
+            <h5><i class="bi bi-building"></i> Departments</h5>
+            <span class="badge bg-secondary" th:text="${departments != null ? departments.size() : 0} + ' departments'">0</span>
+        </div>
+
+        <div th:if="${deptSuccess}" class="alert alert-success" th:text="${deptSuccess}"></div>
+        <div th:if="${deptError}" class="alert alert-danger" th:text="${deptError}"></div>
+
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> <strong>Admin Only:</strong> Add new departments. After adding, you can assign HOD by clicking the edit button.
+        </div>
+
+        <!-- Add Department Form -->
+        <form th:action="@{/admin/departments/add}" method="post" class="row g-2 mb-4 p-3 bg-light rounded">
+            <div class="col-md-5">
+                <label class="form-label-sm">Department Name *</label>
+                <input type="text" name="name" class="form-control form-control-sm" placeholder="e.g., Information Technology" required>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label-sm">Description</label>
+                <input type="text" name="description" class="form-control form-control-sm" placeholder="Brief description (Optional)">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label-sm">&nbsp;</label>
+                <button type="submit" class="btn btn-primary btn-sm w-100">
+                    <i class="bi bi-plus"></i> Add Department
+                </button>
+            </div>
+        </form>
+
+        <!-- Departments List -->
+        <div class="mt-3">
+            <h6 class="mb-3"><i class="bi bi-list-ul"></i> Department List</h6>
+
+            <div th:if="${departments == null or departments.isEmpty()}">
+                <div class="no-data">
+                    <i class="bi bi-building" style="font-size:48px;display:block;opacity:0.3;"></i>
+                    No departments found. Add your first department using the form above!
+                </div>
+            </div>
+
+            <div class="row">
+                <div th:each="d : ${departments}" class="col-md-4">
+                    <div class="dept-card">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="dept-name">
+                                    <i class="bi bi-building"></i>
+                                    <span th:text="${d.name}">IT</span>
+                                </div>
+                                <div class="dept-details">
+                                    <span th:text="${d.description}">Department</span>
+                                    <br>
+                                    <strong>Head:</strong>
+                                    <span th:if="${d.hasDepartmentHead()}" class="head-assigned" th:text="${d.departmentHead}">Dr. Rajesh</span>
+                                    <span th:if="${!d.hasDepartmentHead()}" class="head-not-assigned">Not Assigned</span>
+                                    <br th:if="${d.hasDepartmentHead()}">
+                                    <small th:if="${d.hasDepartmentHead()}" class="text-muted" th:text="'@' + ${d.departmentHeadUsername}">@rajesh</small>
+                                    <br>
+                                    <small class="text-muted">Created: <span th:text="${#temporals.format(d.createdAt, 'dd MMM yyyy')}">23 Aug 2026</span></small>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <span th:if="${d.active}" class="badge bg-success">Active</span>
+                                <span th:if="${!d.active}" class="badge bg-danger">Inactive</span>
+                                <br>
+                                <button class="btn btn-sm btn-outline-primary mt-2"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editHODModal"
+                                        th:data-deptid="${d.id}"
+                                        th:data-deptname="${d.name}"
+                                        th:data-head="${d.departmentHeadUsername}"
+                                        onclick="setEditData(this)">
+                                    <i class="bi bi-pencil"></i> Assign HOD
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit HOD Modal -->
+    <div class="modal fade" id="editHODModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-person-badge"></i> Assign Department Head</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/admin/departments/update-head}" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="departmentId" id="editDeptId">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Department</label>
+                            <input type="text" class="form-control" id="editDeptName" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Select Department Head</label>
+                            <select name="headUsername" class="form-select">
+                                <option value="">Remove Head (Not Assigned)</option>
+                                <option th:each="u : ${users}"
+                                        th:if="${u.role.name() == 'EMPLOYEE' or u.role.name() == 'HOD'}"
+                                        th:value="${u.username}"
+                                        th:text="${u.fullName + ' (' + u.username + ')'}">
+                                </option>
+                            </select>
+                            <small class="text-muted">Select a user to assign as HOD, or select empty to remove</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check2"></i> Assign HOD
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== VIEW MODAL ===== -->
+    <div class="modal fade" id="viewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header modal-header-view">
+                    <h5 class="modal-title"><i class="bi bi-file-text"></i> OutPass Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="text-center mb-4">
+                        <span id="viewStatusBadge" class="status-badge">
+                            <i id="viewStatusIcon" class="bi bi-clock"></i>
+                            <span id="viewStatusText">Loading...</span>
+                        </span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="text-muted small fw-bold">Request ID</label>
+                                <div class="fw-bold" id="viewId">#1</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="text-muted small fw-bold">Date</label>
+                                <div id="viewDate">2026-08-26</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="text-muted small fw-bold">Employee</label>
+                                <div class="fw-bold" id="viewEmployee">John Doe</div>
+                                <small class="text-muted" id="viewEmployeeId">ID: EMP001</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="text-muted small fw-bold">Department</label>
+                                <div id="viewDepartment">IT</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="text-muted small fw-bold">Out Time</label>
+                                <div class="text-primary fw-bold" id="viewOutTime">20:48</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="text-muted small fw-bold">Expected In Time</label>
+                                <div class="text-success fw-bold" id="viewInTime">21:48</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="detail-item">
+                                <label class="text-muted small fw-bold">Reason</label>
+                                <div id="viewReason" style="background: #f8f9fa; padding: 10px; border-radius: 6px;">Client meeting</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4" style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-clock-history"></i> Approval Status</h6>
+
+                        <div class="approval-timeline-item">
+                            <span id="viewHodIcon" class="icon waiting">⏳</span>
+                            <div style="flex:1;">
+                                <strong>HOD</strong>
+                                <span id="viewHodStatus" class="badge bg-secondary ms-2">WAITING</span>
+                                <br><small class="text-muted" id="viewHodName">-</small>
+                                <div id="viewHodRemarks" class="text-muted small"></div>
+                            </div>
+                        </div>
+
+                        <div class="approval-timeline-item">
+                            <span id="viewHrIcon" class="icon waiting">⏳</span>
+                            <div style="flex:1;">
+                                <strong>HR</strong>
+                                <span id="viewHrStatus" class="badge bg-secondary ms-2">WAITING</span>
+                                <br><small class="text-muted" id="viewHrName">-</small>
+                                <div id="viewHrRemarks" class="text-muted small"></div>
+                            </div>
+                        </div>
+
+                        <div class="approval-timeline-item">
+                            <span id="viewSecurityIcon" class="icon waiting">⏳</span>
+                            <div style="flex:1;">
+                                <strong>Security</strong>
+                                <span id="viewSecurityStatus" class="badge bg-secondary ms-2">WAITING</span>
+                                <br><small class="text-muted" id="viewSecurityName">-</small>
+                                <div id="viewSecurityRemarks" class="text-muted small"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="window.print()">
+                        <i class="bi bi-printer"></i> Print
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="text-center text-muted py-3" style="font-size:12px; border-top:1px solid #ddd;">
+        <p>© 2026 ABtech. All rights reserved.</p>
+    </footer>
+</div>
+
+<script>
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('active');
+    }
+
+    function setEditData(btn) {
+        document.getElementById('editDeptId').value = btn.getAttribute('data-deptid');
+        document.getElementById('editDeptName').value = btn.getAttribute('data-deptname');
+
+        var currentHead = btn.getAttribute('data-head');
+        if (currentHead && currentHead !== 'null' && currentHead !== '' && currentHead !== 'undefined') {
+            var select = document.querySelector('#editHODModal select[name="headUsername"]');
+            for (var i = 0; i < select.options.length; i++) {
+                if (select.options[i].value === currentHead) {
+                    select.options[i].selected = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    function openViewModal(btn) {
+        var passId = btn.getAttribute('data-passid');
+        var employee = btn.getAttribute('data-employee');
+        var employeeId = btn.getAttribute('data-employeeid');
+        var date = btn.getAttribute('data-date');
+        var outTime = btn.getAttribute('data-outtime');
+        var inTime = btn.getAttribute('data-intime');
+        var department = btn.getAttribute('data-department');
+        var reason = btn.getAttribute('data-reason');
+        var status = btn.getAttribute('data-status');
+        var hodStatus = btn.getAttribute('data-hodstatus');
+        var hodName = btn.getAttribute('data-hodname');
+        var hodRemarks = btn.getAttribute('data-hodremarks');
+        var hrStatus = btn.getAttribute('data-hrstatus');
+        var hrName = btn.getAttribute('data-hrname');
+        var hrRemarks = btn.getAttribute('data-hrremarks');
+        var securityStatus = btn.getAttribute('data-securitystatus');
+        var securityName = btn.getAttribute('data-securityname');
+        var securityRemarks = btn.getAttribute('data-securityremarks');
+
+        document.getElementById('viewId').textContent = '#' + passId;
+        document.getElementById('viewEmployee').textContent = employee;
+        document.getElementById('viewEmployeeId').textContent = 'ID: ' + (employeeId || 'N/A');
+        document.getElementById('viewDate').textContent = date;
+        document.getElementById('viewOutTime').textContent = outTime;
+        document.getElementById('viewInTime').textContent = inTime;
+        document.getElementById('viewDepartment').textContent = department;
+        document.getElementById('viewReason').textContent = reason;
+
+        var badge = document.getElementById('viewStatusBadge');
+        var icon = document.getElementById('viewStatusIcon');
+        var text = document.getElementById('viewStatusText');
+
+        badge.className = 'status-badge';
+        var statusStr = String(status).toUpperCase();
+
+        if (statusStr === 'APPROVED') {
+            badge.classList.add('success');
+            icon.className = 'bi bi-check-circle';
+            text.textContent = ' Authorized';
+            if (hodName && hodName !== 'null' && hodName.trim() !== '') {
+                text.textContent += ' by ' + hodName;
+            }
+        } else if (statusStr === 'REJECTED') {
+            badge.classList.add('danger');
+            icon.className = 'bi bi-x-circle';
+            text.textContent = ' Rejected';
+            if (hodRemarks && hodRemarks !== 'null' && hodRemarks.trim() !== '') {
+                text.textContent += ' - ' + hodRemarks;
+            }
+        } else if (statusStr === 'PENDING_HOD' || statusStr === 'PENDING') {
+            badge.classList.add('warning');
+            icon.className = 'bi bi-clock';
+            text.textContent = ' Pending (HOD)';
+        } else if (statusStr === 'PENDING_HR') {
+            badge.classList.add('warning');
+            icon.className = 'bi bi-clock';
+            text.textContent = ' Pending (HR)';
+        } else if (statusStr === 'PENDING_SECURITY') {
+            badge.classList.add('warning');
+            icon.className = 'bi bi-clock';
+            text.textContent = ' Pending (Security)';
+        } else {
+            badge.classList.add('secondary');
+            icon.className = 'bi bi-question-circle';
+            text.textContent = ' ' + statusStr;
+        }
+
+        setApprovalStatus('viewHod', hodStatus, hodName, hodRemarks);
+        setApprovalStatus('viewHr', hrStatus, hrName, hrRemarks);
+        setApprovalStatus('viewSecurity', securityStatus, securityName, securityRemarks);
+    }
+
+    function setApprovalStatus(prefix, status, name, remarks) {
+        var statusEl = document.getElementById(prefix + 'Status');
+        var nameEl = document.getElementById(prefix + 'Name');
+        var remarksEl = document.getElementById(prefix + 'Remarks');
+        var iconEl = document.getElementById(prefix + 'Icon');
+
+        statusEl.className = 'badge ms-2';
+        var statusStr = String(status).toUpperCase();
+
+        if (statusStr === 'APPROVED') {
+            statusEl.classList.add('bg-success');
+            statusEl.textContent = ' APPROVED';
+            iconEl.className = 'badge bg-success';
+            iconEl.textContent = '✅';
+        } else if (statusStr === 'REJECTED') {
+            statusEl.classList.add('bg-danger');
+            statusEl.textContent = ' REJECTED';
+            iconEl.className = 'badge bg-danger';
+            iconEl.textContent = '❌';
+        } else if (statusStr === 'PENDING') {
+            statusEl.classList.add('bg-warning');
+            statusEl.textContent = ' PENDING';
+            iconEl.className = 'badge bg-warning';
+            iconEl.textContent = '⏳';
+        } else {
+            statusEl.classList.add('bg-secondary');
+            statusEl.textContent = ' WAITING';
+            iconEl.className = 'badge bg-secondary';
+            iconEl.textContent = '⏳';
+        }
+
+        nameEl.textContent = name || '-';
+        if (remarks && remarks !== 'null' && remarks.trim() !== '') {
+            remarksEl.textContent = 'Remarks: ' + remarks;
+        } else {
+            remarksEl.textContent = '';
+        }
+    }
+
+    // ===== FILTER FUNCTIONS =====
+    var currentPage = 1;
+    var itemsPerPage = 5;
+
+    function filterRequests() {
+        var fromDate = document.getElementById('fromDate').value;
+        var toDate = document.getElementById('toDate').value;
+        var status = document.getElementById('statusFilter').value;
+        var rows = document.querySelectorAll('#requestList tr');
+        var visibleCount = 0;
+
+        rows.forEach(function(row) {
+            var itemDate = row.getAttribute('data-date');
+            var itemStatus = row.getAttribute('data-status');
+            var show = true;
+
+            if (fromDate && itemDate < fromDate) show = false;
+            if (toDate && itemDate > toDate) show = false;
+            if (status && itemStatus !== status) show = false;
+
+            row.style.display = show ? '' : 'none';
+            if (show) visibleCount++;
+        });
+
+        document.getElementById('recordCount').textContent = 'Showing ' + visibleCount + ' records';
+        document.getElementById('visibleCount').textContent = visibleCount;
+        currentPage = 1;
+        updatePagination(visibleCount);
+    }
+
+    function clearAllFilters() {
+        document.getElementById('fromDate').value = '';
+        document.getElementById('toDate').value = '';
+        document.getElementById('statusFilter').value = '';
+        document.querySelectorAll('#requestList tr').forEach(function(row) {
+            row.style.display = '';
+        });
+        var totalItems = document.querySelectorAll('#requestList tr').length;
+        document.getElementById('recordCount').textContent = 'Showing ' + totalItems + ' records';
+        document.getElementById('visibleCount').textContent = totalItems;
+        updatePagination(totalItems);
+    }
+
+    function updatePagination(totalItems) {
+        var totalPages = Math.ceil(totalItems / itemsPerPage);
+        var controls = document.getElementById('paginationControls');
+        controls.innerHTML = '';
+
+        var prevLi = document.createElement('li');
+        prevLi.className = 'page-item' + (currentPage <= 1 ? ' disabled' : '');
+        prevLi.innerHTML = '<a class="page-link" href="#" onclick="changePage(-1)">Previous</a>';
+        controls.appendChild(prevLi);
+
+        for (var i = 1; i <= Math.min(totalPages, 5); i++) {
+            var li = document.createElement('li');
+            li.className = 'page-item' + (i === currentPage ? ' active' : '');
+            li.innerHTML = '<a class="page-link" href="#" onclick="goToPage(' + i + ')">' + i + '</a>';
+            controls.appendChild(li);
+        }
+
+        var nextLi = document.createElement('li');
+        nextLi.className = 'page-item' + (currentPage >= totalPages ? ' disabled' : '');
+        nextLi.innerHTML = '<a class="page-link" href="#" onclick="changePage(1)">Next</a>';
+        controls.appendChild(nextLi);
+    }
+
+    function changePage(delta) {
+        var totalItems = document.querySelectorAll('#requestList tr:not([style*="display: none"])').length;
+        var totalPages = Math.ceil(totalItems / itemsPerPage);
+        var newPage = currentPage + delta;
+        if (newPage >= 1 && newPage <= totalPages) {
+            currentPage = newPage;
+            updatePagination(totalItems);
+        }
+    }
+
+    function goToPage(page) {
+        var totalItems = document.querySelectorAll('#requestList tr:not([style*="display: none"])').length;
+        var totalPages = Math.ceil(totalItems / itemsPerPage);
+        if (page >= 1 && page <= totalPages) {
+            currentPage = page;
+            updatePagination(totalItems);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var totalItems = document.querySelectorAll('#requestList tr').length;
+        document.getElementById('recordCount').textContent = 'Showing ' + totalItems + ' records';
+        document.getElementById('visibleCount').textContent = totalItems;
+        updatePagination(totalItems);
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

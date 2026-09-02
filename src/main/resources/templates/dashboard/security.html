@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2317365d'/%3E%3Ctext x='50' y='70' font-size='50' font-weight='900' font-family='Arial' text-anchor='middle' fill='%2328a745'%3EAB%3C/text%3E%3C/svg%3E">
+
+    <title>Security Dashboard - OutPass System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f0f4f8; min-height: 100vh; }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 260px;
+            background: linear-gradient(180deg, #0f1a30 0%, #1a2d4a 50%, #17365d 100%);
+            color: white;
+            padding: 20px 0;
+            transition: all 0.3s;
+            z-index: 1000;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+        }
+        .sidebar .brand { padding: 0 20px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); text-align: center; }
+        .sidebar .brand .logo-text { font-size: 28px; font-weight: 900; color: white; letter-spacing: 1px; }
+        .sidebar .brand .logo-text .highlight { color: #28a745; }
+        .sidebar .brand .logo-tagline { font-size: 8px; letter-spacing: 4px; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-top: 2px; }
+        .sidebar .brand .brand-sub { font-weight: 300; font-size: 11px; opacity: 0.6; margin-top: 2px; }
+        .sidebar .menu-label { padding: 15px 20px 8px; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.4; font-weight: 600; }
+        .sidebar .nav-item { padding: 10px 20px; display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,0.6); text-decoration: none; transition: all 0.3s; border-left: 3px solid transparent; font-weight: 500; font-size: 13px; cursor: pointer; }
+        .sidebar .nav-item:hover { background: rgba(255,255,255,0.05); color: white; border-left-color: #28a745; }
+        .sidebar .nav-item.active { background: rgba(40,167,69,0.1); color: #28a745; border-left-color: #28a745; }
+        .sidebar .nav-item i { font-size: 17px; width: 22px; }
+        .sidebar .nav-item .badge-count { margin-left: auto; background: #ffc107; color: #17365d; padding: 2px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+        .sidebar .user-card { position: absolute; bottom: 0; left: 0; right: 0; padding: 15px 20px; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.2); }
+        .sidebar .user-card .avatar { width: 36px; height: 36px; border-radius: 50%; background: #28a745; display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; font-size: 14px; }
+        .sidebar .user-card .user-info { flex: 1; }
+        .sidebar .user-card .user-info .name { font-weight: 600; font-size: 13px; }
+        .sidebar .user-card .user-info .role { font-size: 11px; opacity: 0.6; }
+
+        .main-content { margin-left: 260px; padding: 20px 30px; min-height: 100vh; }
+
+        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; background: white; padding: 12px 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
+        .top-header .page-title h4 { font-weight: 700; color: #17365d; margin: 0; font-size: 18px; }
+        .top-header .page-title p { font-size: 12px; color: #888; margin: 0; }
+        .top-header .page-title .dept-tag { background: #28a745; color: white; padding: 2px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .top-header .header-actions .btn-logout { background: #dc3545; color: white; border: none; padding: 6px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; transition: all 0.3s; }
+        .top-header .header-actions .btn-logout:hover { background: #c82333; transform: translateY(-2px); }
+
+        .filter-section { background: #f8f9fa; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; }
+        .filter-section .form-label-sm { font-size: 11px; font-weight: 600; color: #555; margin-bottom: 2px; }
+
+        .section-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); margin-bottom: 25px; border: none; display: none; }
+        .section-card.active { display: block; }
+        .section-card .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 2px solid #f0f4f8; }
+        .section-card .section-header h5 { font-weight: 700; color: #17365d; margin: 0; font-size: 15px; }
+
+        .table-custom { width: 100%; font-size: 13px; }
+        .table-custom thead th { background: #f8f9fa; color: #17365d; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; border-bottom: 2px solid #e9ecef; }
+        .table-custom tbody td { padding: 10px 12px; vertical-align: middle; border-bottom: 1px solid #f0f4f8; }
+        .table-custom tbody tr:hover { background: #f8f9fa; }
+
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-block; }
+        .status-badge.success { background: #d4edda; color: #28a745; }
+        .status-badge.warning { background: #fff3cd; color: #856404; }
+        .status-badge.danger { background: #f8d7da; color: #dc3545; }
+        .status-badge.secondary { background: #e9ecef; color: #495057; }
+        .status-badge.info { background: #d1ecf1; color: #0c5460; }
+
+        .no-data { text-align: center; padding: 30px; color: #888; }
+        .no-data i { font-size: 36px; display: block; margin-bottom: 10px; opacity: 0.3; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); transition: all 0.3s; border: 1px solid #f0f4f8; }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-color: #17365d; }
+        .stat-card .stat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 10px; }
+        .stat-card .stat-icon.blue { background: #e8edf5; color: #17365d; }
+        .stat-card .stat-icon.yellow { background: #fff3cd; color: #ffc107; }
+        .stat-card .stat-icon.green { background: #d4edda; color: #28a745; }
+        .stat-card .stat-icon.red { background: #f8d7da; color: #dc3545; }
+        .stat-card .stat-number { font-size: 28px; font-weight: 800; color: #17365d; line-height: 1.2; }
+        .stat-card .stat-label { font-size: 13px; color: #888; font-weight: 500; }
+
+        .action-btns { display: flex; gap: 4px; flex-wrap: wrap; }
+
+        .alert-info { background: #d1ecf1; color: #0c5460; padding: 12px 18px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #17a2b8; }
+        .alert-success { background: #d4edda; color: #155724; padding: 10px 15px; border-radius: 8px; border-left: 4px solid #28a745; margin-bottom: 10px; }
+        .alert-danger { background: #f8d7da; color: #721c24; padding: 10px 15px; border-radius: 8px; border-left: 4px solid #dc3545; margin-bottom: 10px; }
+
+        .mobile-toggle { display: none; background: #17365d; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 18px; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; }
+        .sidebar-overlay.active { display: block; }
+
+        .time-badge { padding: 3px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; display: inline-block; }
+        .time-badge.out { background: #fff3cd; color: #856404; }
+        .time-badge.returned { background: #d4edda; color: #28a745; }
+        .time-badge.overdue { background: #f8d7da; color: #dc3545; }
+        .time-badge.not-started { background: #e9ecef; color: #6c757d; }
+
+        /* View Modal Styles */
+        .detail-item { padding: 8px 0; border-bottom: 1px solid #f0f4f8; }
+        .detail-item label { display: block; margin-bottom: 2px; font-size: 12px; color: #6c757d; }
+        .detail-item div { font-size: 14px; }
+
+        .modal-header-view { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; border-radius: 12px 12px 0 0; }
+        .modal-header-view .btn-close { filter: brightness(0) invert(1); }
+        .approval-timeline-item { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; background: white; }
+        .approval-timeline-item .icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+        .approval-timeline-item .icon.approved { background: #d4edda; color: #28a745; }
+        .approval-timeline-item .icon.rejected { background: #f8d7da; color: #dc3545; }
+        .approval-timeline-item .icon.pending { background: #fff3cd; color: #856404; }
+        .approval-timeline-item .icon.waiting { background: #e9ecef; color: #6c757d; }
+
+        @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 992px) { .sidebar { transform: translateX(-100%); width: 260px; } .sidebar.open { transform: translateX(0); } .main-content { margin-left: 0; padding: 15px; } .mobile-toggle { display: flex !important; } }
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr; } .top-header { flex-direction: column; align-items: start; gap: 10px; } }
+
+        .sidebar::-webkit-scrollbar { width: 3px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<div class="sidebar" id="sidebar">
+    <div class="brand">
+        <div style="text-align: center; padding: 10px 0 5px 0;">
+            <div style="font-size: 28px; font-weight: 900; color: white; letter-spacing: 1px;">
+                AB<span style="color: #28a745;">tech</span>
+            </div>
+            <div style="font-size: 8px; letter-spacing: 4px; color: rgba(255, 255, 255, 0.4); text-transform: uppercase; margin-top: 2px;">
+                BUILD • CODE • GROW
+            </div>
+        </div>
+        <div style="font-weight: 300; font-size: 11px; opacity: 0.6; text-align: center; margin-top: 2px;">
+            Security Portal
+        </div>
+    </div>
+
+    <div class="menu-label">Main</div>
+    <a href="/security/dashboard?tab=dashboard" class="nav-item active">
+        <i class="bi bi-grid-1x2-fill"></i> Dashboard
+    </a>
+
+    <div class="menu-label">Tracking</div>
+    <a href="#" class="nav-item" onclick="switchTab('currentlyout')">
+        <i class="bi bi-person-walking"></i> Currently Out
+        <span class="badge-count" th:text="${outCount != null ? outCount : 0}">0</span>
+    </a>
+
+    <div class="user-card">
+        <div class="d-flex align-items-center gap-3">
+            <div class="avatar">
+                <span th:text="${#strings.substring(loggedInUser.fullName, 0, 1)}">S</span>
+            </div>
+            <div class="user-info">
+                <div class="name" th:text="${loggedInUser.fullName}">Security</div>
+                <div class="role">Security</div>
+            </div>
+            <a href="/logout" class="text-white" style="opacity:0.6; font-size:18px;">
+                <i class="bi bi-box-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ===== OVERLAY ===== -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="main-content">
+
+    <!-- ===== TOP HEADER ===== -->
+    <div class="top-header">
+        <div class="d-flex align-items-center gap-3">
+            <button class="mobile-toggle" onclick="toggleSidebar()">
+                <i class="bi bi-list"></i>
+            </button>
+            <div class="page-title">
+                <h4><i class="bi bi-shield-lock"></i> Security Dashboard</h4>
+                <p>
+                    Welcome back, <strong th:text="${loggedInUser.fullName}">Security</strong>!
+                    <span class="dept-tag">View & Track</span>
+                </p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <a href="/logout" class="btn-logout">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- ===== Success/Error Messages ===== -->
+    <div th:if="${param.success != null}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle"></i> <span th:text="${param.success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${param.error != null}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-circle"></i> <span th:text="${param.error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ===== DASHBOARD TAB ===== -->
+    <!-- ============================================================ -->
+    <div id="section-dashboard" class="section-card active">
+
+        <!-- Security Info -->
+        <div class="alert-info" style="padding: 12px 18px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #17a2b8;">
+            <i class="bi bi-info-circle"></i>
+            <strong>Security Access:</strong> You can view all requests and track employee entry/exit times.
+            <span class="badge bg-success">VIEW & TRACK</span>
+        </div>
+
+        <!-- All Requests -->
+        <div class="section-header" style="margin-top: 20px;">
+            <h5><i class="bi bi-list-ul"></i> All Requests</h5>
+            <span class="badge bg-secondary" th:text="${totalCount != null ? totalCount : 0} + ' total'">0</span>
+        </div>
+
+        <!-- FILTERS -->
+        <div class="filter-section">
+            <form action="/security/dashboard" method="get" id="filterForm">
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <label class="form-label-sm">From Date</label>
+                        <input type="date" name="fromDate" class="form-control form-control-sm"
+                               th:value="${filterFromDate}" onchange="document.getElementById('filterForm').submit()">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-sm">To Date</label>
+                        <input type="date" name="toDate" class="form-control form-control-sm"
+                               th:value="${filterToDate}" onchange="document.getElementById('filterForm').submit()">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-sm">Status</label>
+                        <select name="status" class="form-select form-select-sm" onchange="document.getElementById('filterForm').submit()">
+                            <option value="">All Status</option>
+                            <option value="APPROVED" th:selected="${filterStatus == 'APPROVED'}">✅ Authorized</option>
+                            <option value="PENDING_HOD" th:selected="${filterStatus == 'PENDING_HOD'}">⏳ Pending</option>
+                            <option value="REJECTED" th:selected="${filterStatus == 'REJECTED'}">❌ Rejected</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-sm">&nbsp;</label>
+                        <div class="d-flex gap-2">
+                            <a href="/security/dashboard" class="btn btn-sm btn-secondary w-50">
+                                <i class="bi bi-arrow-counterclockwise"></i> Clear
+                            </a>
+                            <a th:href="@{/security/export/excel(fromDate=${filterFromDate}, toDate=${filterToDate}, status=${filterStatus})}"
+                               class="btn btn-sm btn-success w-50">
+                                <i class="bi bi-file-earmark-excel"></i> Export
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-12 text-end">
+                        <span class="text-muted small">Showing <strong th:text="${totalCount != null ? totalCount : 0}">0</strong> records</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-responsive">
+            <table class="table-custom" id="requestTable">
+                <thead>
+                <tr>
+                    <th style="width:50px;">#</th>
+                    <th>Employee</th>
+                    <th>Department</th>
+                    <th>Date</th>
+                    <th>Out / In</th>
+                    <th>Status</th>
+                    <th>Authorized By</th>
+                    <th>Time Status</th>
+                    <th style="width:180px;">Action</th>
+                </tr>
+                </thead>
+                <tbody id="requestList">
+                <tr th:if="${allPasses == null or allPasses.isEmpty()}">
+                    <td colspan="9" class="no-data">
+                        <i class="bi bi-inbox" style="font-size:40px;display:block;opacity:0.3;"></i>
+                        No requests found
+                    </td>
+                </tr>
+                <tr th:each="p, iterStat : ${allPasses}"
+                    th:if="${allPasses != null and !allPasses.isEmpty()}"
+                    th:data-date="${p.passDate}"
+                    th:data-status="${p.overallStatus}">
+
+                    <td><strong>#<span th:text="${iterStat.index + 1}">1</span></strong></td>
+                    <td>
+                        <strong th:text="${p.employeeName}">John Doe</strong>
+                        <br><small class="text-muted" th:text="'ID: ' + ${p.employeeId}">EMP001</small>
+                    </td>
+                    <td th:text="${p.department != null ? p.department.name : 'N/A'}">IT</td>
+                    <td th:text="${p.passDate}">2026-08-23</td>
+                    <td>
+                        <span class="text-primary" th:text="${p.outTime}">10:00</span>
+                        <i class="bi bi-arrow-right"></i>
+                        <span class="text-success" th:text="${p.expectedInTime}">12:00</span>
+                    </td>
+                    <td>
+                        <span th:if="${p.isAuthorized()}" class="status-badge success">
+                            <i class="bi bi-check-circle"></i> Authorized
+                        </span>
+                        <span th:if="${p.isRejected()}" class="status-badge danger">
+                            <i class="bi bi-x-circle"></i> Rejected
+                        </span>
+                        <span th:if="${p.isPending()}" class="status-badge warning">
+                            <i class="bi bi-clock"></i> Pending
+                        </span>
+                    </td>
+                    <td>
+                        <span th:if="${p.isAuthorized()}" class="text-success" th:text="${p.getAuthorizedBy()}">HOD: Dr. Rajesh</span>
+                        <span th:if="${p.isRejected()}" class="text-danger" th:text="'By: ' + ${p.hodName != null ? p.hodName : p.hrName}">By: Dr. Rajesh</span>
+                        <span th:if="${p.isPending()}" class="text-muted">—</span>
+                    </td>
+                    <td>
+                        <span class="time-badge"
+                              th:classappend="${p.timeStatus == null ? 'not-started' :
+                                             (p.timeStatus.name() == 'NOT_STARTED' ? 'not-started' :
+                                             (p.timeStatus.name() == 'OUT' ? 'out' :
+                                             (p.timeStatus.name() == 'RETURNED' ? 'returned' : 'overdue')))}">
+                            <span th:text="${p.timeStatus == null ? 'Not Started' : p.getTimeStatusLabel()}">Not Started</span>
+                            <span th:if="${p.actualOutTime != null}" class="d-block small">
+                                <span th:if="${p.timeStatus != null and p.timeStatus.name() == 'OUT'}" class="text-warning">
+                                    Out: <span th:text="${#temporals.format(p.actualOutTime, 'HH:mm')}">10:00</span>
+                                </span>
+                                <span th:if="${p.timeStatus != null and (p.timeStatus.name() == 'RETURNED' or p.timeStatus.name() == 'OVERDUE')}" class="text-success">
+                                    In: <span th:text="${#temporals.format(p.actualInTime, 'HH:mm')}">12:00</span>
+                                </span>
+                            </span>
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-btns">
+                            <!-- MARK OUT -->
+                            <form th:if="${p.isAuthorized() and (p.timeStatus == null or p.timeStatus.name() == 'NOT_STARTED')}"
+                                  th:action="@{/security/mark-out}" method="post" class="d-inline">
+                                <input type="hidden" name="passId" th:value="${p.id}">
+                                <button type="submit" class="btn btn-sm btn-warning" title="Mark Out">
+                                    <i class="bi bi-box-arrow-right"></i> Out
+                                </button>
+                            </form>
+
+                            <!-- MARK RETURN -->
+                            <form th:if="${p.isAuthorized() and p.timeStatus != null and p.timeStatus.name() == 'OUT'}"
+                                  th:action="@{/security/mark-return}" method="post" class="d-inline">
+                                <input type="hidden" name="passId" th:value="${p.id}">
+                                <button type="submit" class="btn btn-sm btn-success" title="Mark Return">
+                                    <i class="bi bi-box-arrow-in-left"></i> Return
+                                </button>
+                            </form>
+
+                            <!-- View Button - Opens Modal -->
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#viewModal"
+                                    th:data-passid="${p.id}"
+                                    th:data-employee="${p.employeeName}"
+                                    th:data-employeeid="${p.employeeId}"
+                                    th:data-date="${p.passDate}"
+                                    th:data-outtime="${p.outTime}"
+                                    th:data-intime="${p.expectedInTime}"
+                                    th:data-department="${p.department != null ? p.department.name : 'N/A'}"
+                                    th:data-reason="${p.reason}"
+                                    th:data-status="${p.overallStatus}"
+                                    th:data-hodstatus="${p.hodStatus}"
+                                    th:data-hodname="${p.hodName}"
+                                    th:data-hodremarks="${p.hodRemarks}"
+                                    th:data-hrstatus="${p.hrStatus}"
+                                    th:data-hrname="${p.hrName}"
+                                    th:data-hrremarks="${p.hrRemarks}"
+                                    th:data-securitystatus="${p.securityStatus}"
+                                    th:data-securityname="${p.securityName}"
+                                    th:data-securityremarks="${p.securityRemarks}"
+                                    th:data-actualout="${p.actualOutTime}"
+                                    th:data-actualin="${p.actualInTime}"
+                                    th:data-timestatus="${p.timeStatus}"
+                                    th:data-duration="${p.getDuration()}"
+                                    onclick="openViewModal(this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-3" th:if="${allPasses != null and !allPasses.isEmpty()}">
+            <span class="text-muted small">Showing <strong id="visibleCount">0</strong> records</span>
+            <nav>
+                <ul class="pagination pagination-sm mb-0" id="paginationControls">
+                    <li class="page-item disabled"><a class="page-link" href="#" onclick="changePage(-1)">Previous</a></li>
+                    <li class="page-item active"><a class="page-link" href="#" onclick="goToPage(1)">1</a></li>
+                    <li class="page-item disabled"><a class="page-link" href="#" onclick="changePage(1)">Next</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ===== CURRENTLY OUT TAB ===== -->
+    <!-- ============================================================ -->
+    <div id="section-currentlyout" class="section-card">
+        <div class="section-header">
+            <h5><i class="bi bi-person-walking"></i> Currently Out</h5>
+            <span class="badge bg-warning text-dark" th:text="${outCount != null ? outCount : 0} + ' out'">0</span>
+        </div>
+
+        <div th:if="${currentlyOut == null or currentlyOut.isEmpty()}">
+            <div class="no-data">
+                <i class="bi bi-people" style="font-size:48px;display:block;opacity:0.3;"></i>
+                No employees are currently out
+            </div>
+        </div>
+
+        <div class="table-responsive" th:if="${currentlyOut != null and !currentlyOut.isEmpty()}">
+            <table class="table-custom">
+                <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Department</th>
+                    <th>Expected Return</th>
+                    <th>Out Since</th>
+                    <th>Duration</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${currentlyOut}">
+                    <td>
+                        <strong th:text="${p.employeeName}">John Doe</strong>
+                        <br><small class="text-muted" th:text="'ID: ' + ${p.employeeId}">EMP001</small>
+                    </td>
+                    <td th:text="${p.department != null ? p.department.name : 'N/A'}">IT</td>
+                    <td>
+                        <span class="text-primary" th:text="${p.expectedInTime}">12:00</span>
+                        <br>
+                        <span th:if="${p.expectedInTime.isBefore(java.time.LocalTime.now())}" class="text-danger">
+                            <i class="bi bi-exclamation-triangle"></i> Overdue
+                        </span>
+                    </td>
+                    <td>
+                        <span th:text="${#temporals.format(p.actualOutTime, 'HH:mm')}">10:00</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-warning" th:text="${p.getDuration()}">2h 30m</span>
+                    </td>
+                    <td>
+                        <form th:action="@{/security/mark-return}" method="post" class="d-inline">
+                            <input type="hidden" name="passId" th:value="${p.id}">
+                            <button type="submit" class="btn btn-sm btn-success">
+                                <i class="bi bi-box-arrow-in-left"></i> Mark Return
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ===== VIEW MODAL ===== -->
+    <!-- ============================================================ -->
+    <div class="modal fade" id="viewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header modal-header-view">
+                    <h5 class="modal-title"><i class="bi bi-file-text"></i> OutPass Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+
+                    <!-- Status Badge -->
+                    <div class="text-center mb-4">
+                        <span id="viewStatusBadge" class="status-badge">
+                            <i id="viewStatusIcon" class="bi bi-clock"></i>
+                            <span id="viewStatusText">Loading...</span>
+                        </span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="text-muted small fw-bold">Request ID</label>
+                                <div class="fw-bold" id="viewId">#1</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="text-muted small fw-bold">Date</label>
+                                <div id="viewDate">2026-08-26</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="text-muted small fw-bold">Employee</label>
+                                <div class="fw-bold" id="viewEmployee">John Doe</div>
+                                <small class="text-muted" id="viewEmployeeId">ID: EMP001</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="text-muted small fw-bold">Department</label>
+                                <div id="viewDepartment">IT</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="text-muted small fw-bold">Scheduled Out Time</label>
+                                <div class="text-primary fw-bold" id="viewOutTime">20:48</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="text-muted small fw-bold">Scheduled In Time</label>
+                                <div class="text-success fw-bold" id="viewInTime">21:48</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Tracking -->
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <div class="detail-item" style="border-left: 3px solid #ffc107; padding-left: 10px;">
+                                <label><i class="bi bi-box-arrow-right"></i> Actual Out Time</label>
+                                <div id="viewActualOut" class="text-warning fw-bold">Not yet out</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-item" style="border-left: 3px solid #28a745; padding-left: 10px;">
+                                <label><i class="bi bi-box-arrow-in-left"></i> Actual In Time</label>
+                                <div id="viewActualIn" class="text-success fw-bold">Not yet returned</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label>Time Status</label>
+                                <div id="viewTimeStatus" class="fw-bold"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label>Duration</label>
+                                <div id="viewDuration" class="fw-bold text-primary">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="detail-item">
+                                <label class="text-muted small fw-bold">Reason</label>
+                                <div id="viewReason" style="background: #f8f9fa; padding: 10px; border-radius: 6px;">Client meeting</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Approval Timeline -->
+                    <div class="mt-4" style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-clock-history"></i> Approval Status</h6>
+
+                        <div class="approval-timeline-item">
+                            <span id="viewHodIcon" class="icon waiting">⏳</span>
+                            <div style="flex:1;">
+                                <strong>HOD</strong>
+                                <span id="viewHodStatus" class="badge bg-secondary ms-2">WAITING</span>
+                                <br><small class="text-muted" id="viewHodName">-</small>
+                                <div id="viewHodRemarks" class="text-muted small"></div>
+                            </div>
+                        </div>
+
+                        <div class="approval-timeline-item">
+                            <span id="viewHrIcon" class="icon waiting">⏳</span>
+                            <div style="flex:1;">
+                                <strong>HR</strong>
+                                <span id="viewHrStatus" class="badge bg-secondary ms-2">WAITING</span>
+                                <br><small class="text-muted" id="viewHrName">-</small>
+                                <div id="viewHrRemarks" class="text-muted small"></div>
+                            </div>
+                        </div>
+
+                        <div class="approval-timeline-item">
+                            <span id="viewSecurityIcon" class="icon waiting">⏳</span>
+                            <div style="flex:1;">
+                                <strong>Security</strong>
+                                <span id="viewSecurityStatus" class="badge bg-secondary ms-2">WAITING</span>
+                                <br><small class="text-muted" id="viewSecurityName">-</small>
+                                <div id="viewSecurityRemarks" class="text-muted small"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="window.print()">
+                        <i class="bi bi-printer"></i> Print
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ===== FOOTER ===== -->
+    <footer class="text-center text-muted py-3" style="font-size:12px;">
+        <p>© 2026 ABtech. All rights reserved.</p>
+    </footer>
+</div>
+
+<script>
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('active');
+    }
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.section-card').forEach(el => {
+            el.classList.remove('active');
+        });
+        document.getElementById('section-' + tabName).classList.add('active');
+
+        document.querySelectorAll('.nav-item').forEach(el => {
+            el.classList.remove('active');
+        });
+        document.querySelector('.nav-item[data-tab="' + tabName + '"]').classList.add('active');
+    }
+
+    function openViewModal(btn) {
+    var passId = btn.getAttribute('data-passid');
+    var employee = btn.getAttribute('data-employee');
+    var employeeId = btn.getAttribute('data-employeeid');
+    var date = btn.getAttribute('data-date');
+    var outTime = btn.getAttribute('data-outtime');
+    var inTime = btn.getAttribute('data-intime');
+    var department = btn.getAttribute('data-department');
+    var reason = btn.getAttribute('data-reason');
+    var status = btn.getAttribute('data-status');
+    var hodStatus = btn.getAttribute('data-hodstatus');
+    var hodName = btn.getAttribute('data-hodname');
+    var hodRemarks = btn.getAttribute('data-hodremarks');
+    var hrStatus = btn.getAttribute('data-hrstatus');
+    var hrName = btn.getAttribute('data-hrname');
+    var hrRemarks = btn.getAttribute('data-hrremarks');
+    var securityStatus = btn.getAttribute('data-securitystatus');
+    var securityName = btn.getAttribute('data-securityname');
+    var securityRemarks = btn.getAttribute('data-securityremarks');
+    var actualOut = btn.getAttribute('data-actualout');
+    var actualIn = btn.getAttribute('data-actualin');
+    var timeStatus = btn.getAttribute('data-timestatus');
+    var duration = btn.getAttribute('data-duration');
+
+    // Set basic details
+    document.getElementById('viewId').textContent = '#' + passId;
+    document.getElementById('viewEmployee').textContent = employee;
+    document.getElementById('viewEmployeeId').textContent = 'ID: ' + (employeeId || 'N/A');
+    document.getElementById('viewDate').textContent = date;
+    document.getElementById('viewOutTime').textContent = outTime;
+    document.getElementById('viewInTime').textContent = inTime;
+    document.getElementById('viewDepartment').textContent = department;
+    document.getElementById('viewReason').textContent = reason;
+
+    // ✅ Format Actual Out Time - Show only time (HH:mm)
+    if (actualOut && actualOut !== 'null' && actualOut !== '') {
+        try {
+            var outDate = new Date(actualOut);
+            var outFormatted = formatTimeOnly(outDate);
+            document.getElementById('viewActualOut').textContent = outFormatted;
+        } catch(e) {
+            document.getElementById('viewActualOut').textContent = actualOut;
+        }
+    } else {
+        document.getElementById('viewActualOut').textContent = 'Not yet out';
+    }
+
+    // ✅ Format Actual In Time - Show only time (HH:mm)
+    if (actualIn && actualIn !== 'null' && actualIn !== '') {
+        try {
+            var inDate = new Date(actualIn);
+            var inFormatted = formatTimeOnly(inDate);
+            document.getElementById('viewActualIn').textContent = inFormatted;
+        } catch(e) {
+            document.getElementById('viewActualIn').textContent = actualIn;
+        }
+    } else {
+        document.getElementById('viewActualIn').textContent = 'Not yet returned';
+    }
+
+    // Duration
+    if (duration && duration !== 'null' && duration !== '') {
+        document.getElementById('viewDuration').textContent = duration;
+    } else {
+        document.getElementById('viewDuration').textContent = '-';
+    }
+
+    // Time Status
+    var timeStatusEl = document.getElementById('viewTimeStatus');
+    var statusLabels = {
+        'NOT_STARTED': '<span class="badge bg-secondary">Not Started</span>',
+        'OUT': '<span class="badge bg-warning text-dark">Out</span>',
+        'RETURNED': '<span class="badge bg-success">Returned</span>',
+        'OVERDUE': '<span class="badge bg-danger">Overdue</span>'
+    };
+
+    if (timeStatus && timeStatus !== 'null' && timeStatus !== '') {
+        timeStatusEl.innerHTML = statusLabels[timeStatus] || '<span class="badge bg-secondary">Unknown</span>';
+    } else {
+        timeStatusEl.innerHTML = '<span class="badge bg-secondary">Not Started</span>';
+    }
+
+    // Status Badge
+    var badge = document.getElementById('viewStatusBadge');
+    var icon = document.getElementById('viewStatusIcon');
+    var text = document.getElementById('viewStatusText');
+
+    badge.className = 'status-badge';
+    var statusStr = String(status).toUpperCase();
+
+    if (statusStr === 'APPROVED') {
+        badge.classList.add('success');
+        icon.className = 'bi bi-check-circle';
+        text.textContent = ' Authorized';
+    } else if (statusStr === 'REJECTED') {
+        badge.classList.add('danger');
+        icon.className = 'bi bi-x-circle';
+        text.textContent = ' Rejected';
+    } else if (statusStr === 'PENDING_HOD' || statusStr === 'PENDING') {
+        badge.classList.add('warning');
+        icon.className = 'bi bi-clock';
+        text.textContent = ' Pending (HOD)';
+    } else if (statusStr === 'PENDING_HR') {
+        badge.classList.add('warning');
+        icon.className = 'bi bi-clock';
+        text.textContent = ' Pending (HR)';
+    } else {
+        badge.classList.add('secondary');
+        icon.className = 'bi bi-question-circle';
+        text.textContent = ' ' + statusStr;
+    }
+
+    setApprovalStatus('viewHod', hodStatus, hodName, hodRemarks);
+    setApprovalStatus('viewHr', hrStatus, hrName, hrRemarks);
+    setApprovalStatus('viewSecurity', securityStatus, securityName, securityRemarks);
+}
+
+// ✅ NEW: Format only time as HH:mm
+function formatTimeOnly(date) {
+    if (!date || isNaN(date.getTime())) {
+        return 'Invalid Time';
+    }
+    var hours = String(date.getHours()).padStart(2, '0');
+    var minutes = String(date.getMinutes()).padStart(2, '0');
+    return hours + ':' + minutes;
+}
+
+// ✅ Keep this for any date formatting if needed
+function formatDateTime(date) {
+    if (!date || isNaN(date.getTime())) {
+        return 'Invalid Date';
+    }
+    var day = String(date.getDate()).padStart(2, '0');
+    var month = String(date.getMonth() + 1).padStart(2, '0');
+    var year = date.getFullYear();
+    var hours = String(date.getHours()).padStart(2, '0');
+    var minutes = String(date.getMinutes()).padStart(2, '0');
+    return day + '-' + month + '-' + year + ' ' + hours + ':' + minutes;
+}
+
+    // ===== FILTER FUNCTIONS =====
+    var currentPage = 1;
+    var itemsPerPage = 5;
+
+    function filterRequests() {
+        var fromDate = document.getElementById('fromDate').value;
+        var toDate = document.getElementById('toDate').value;
+        var status = document.getElementById('statusFilter').value;
+        var rows = document.querySelectorAll('#requestList tr');
+        var visibleCount = 0;
+
+        rows.forEach(function(row) {
+            var itemDate = row.getAttribute('data-date');
+            var itemStatus = row.getAttribute('data-status');
+            var show = true;
+
+            if (fromDate && itemDate < fromDate) show = false;
+            if (toDate && itemDate > toDate) show = false;
+            if (status && itemStatus !== status) show = false;
+
+            row.style.display = show ? '' : 'none';
+            if (show) visibleCount++;
+        });
+
+        document.getElementById('recordCount').textContent = 'Showing ' + visibleCount + ' records';
+        document.getElementById('visibleCount').textContent = visibleCount;
+        currentPage = 1;
+        updatePagination(visibleCount);
+    }
+
+    function clearAllFilters() {
+        document.getElementById('fromDate').value = '';
+        document.getElementById('toDate').value = '';
+        document.getElementById('statusFilter').value = '';
+        document.querySelectorAll('#requestList tr').forEach(function(row) {
+            row.style.display = '';
+        });
+        var totalItems = document.querySelectorAll('#requestList tr').length;
+        document.getElementById('recordCount').textContent = 'Showing ' + totalItems + ' records';
+        document.getElementById('visibleCount').textContent = totalItems;
+        updatePagination(totalItems);
+    }
+
+    function updatePagination(totalItems) {
+        var totalPages = Math.ceil(totalItems / itemsPerPage);
+        var controls = document.getElementById('paginationControls');
+        controls.innerHTML = '';
+
+        var prevLi = document.createElement('li');
+        prevLi.className = 'page-item' + (currentPage <= 1 ? ' disabled' : '');
+        prevLi.innerHTML = '<a class="page-link" href="#" onclick="changePage(-1)">Previous</a>';
+        controls.appendChild(prevLi);
+
+        for (var i = 1; i <= Math.min(totalPages, 5); i++) {
+            var li = document.createElement('li');
+            li.className = 'page-item' + (i === currentPage ? ' active' : '');
+            li.innerHTML = '<a class="page-link" href="#" onclick="goToPage(' + i + ')">' + i + '</a>';
+            controls.appendChild(li);
+        }
+
+        var nextLi = document.createElement('li');
+        nextLi.className = 'page-item' + (currentPage >= totalPages ? ' disabled' : '');
+        nextLi.innerHTML = '<a class="page-link" href="#" onclick="changePage(1)">Next</a>';
+        controls.appendChild(nextLi);
+    }
+
+    function changePage(delta) {
+        var totalItems = document.querySelectorAll('#requestList tr:not([style*="display: none"])').length;
+        var totalPages = Math.ceil(totalItems / itemsPerPage);
+        var newPage = currentPage + delta;
+        if (newPage >= 1 && newPage <= totalPages) {
+            currentPage = newPage;
+            updatePagination(totalItems);
+        }
+    }
+
+    function goToPage(page) {
+        var totalItems = document.querySelectorAll('#requestList tr:not([style*="display: none"])').length;
+        var totalPages = Math.ceil(totalItems / itemsPerPage);
+        if (page >= 1 && page <= totalPages) {
+            currentPage = page;
+            updatePagination(totalItems);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var totalItems = document.querySelectorAll('#requestList tr').length;
+        document.getElementById('recordCount').textContent = 'Showing ' + totalItems + ' records';
+        document.getElementById('visibleCount').textContent = totalItems;
+        updatePagination(totalItems);
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

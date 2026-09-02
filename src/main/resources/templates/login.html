@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - OutPass System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f1a30 0%, #1a2d4a 40%, #17365d 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-wrapper {
+            max-width: 420px;
+            width: 100%;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 24px;
+            padding: 45px 35px 35px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-icon {
+            width: 68px;
+            height: 68px;
+            background: linear-gradient(135deg, #17365d, #1a4a7a);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 28px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(23, 54, 93, 0.3);
+        }
+
+        .logo-section h2 {
+            color: #17365d;
+            font-weight: 800;
+            font-size: 22px;
+        }
+
+        .logo-section p {
+            color: #888;
+            font-size: 13px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .form-group .form-control {
+            border-radius: 10px;
+            padding: 12px 15px;
+            border: 2px solid #e8edf5;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group .form-control:focus {
+            border-color: #17365d;
+            box-shadow: 0 0 0 4px rgba(23, 54, 93, 0.12);
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            padding: 5px;
+            z-index: 5;
+        }
+
+        .password-toggle:hover {
+            color: #17365d;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, #17365d, #1a4a7a);
+            color: white;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 15px;
+            width: 100%;
+            border: none;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(23, 54, 93, 0.35);
+            color: white;
+        }
+
+        .btn-login i {
+            margin-right: 8px;
+        }
+
+        .alert-danger {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Professional Role Badges at bottom */
+        .roles-section {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+            padding-top: 18px;
+            border-top: 1px solid #e9ecef;
+            flex-wrap: wrap;
+        }
+
+        .roles-section .role-pill {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .role-pill.admin { background: #dc3545; color: white; }
+        .role-pill.hod { background: #ffc107; color: #333; }
+        .role-pill.hr { background: #17a2b8; color: white; }
+        .role-pill.employee { background: #28a745; color: white; }
+        .role-pill.security { background: #6c757d; color: white; }
+
+        @media (max-width: 480px) {
+            .login-card { padding: 30px 20px 25px; }
+            .logo-icon { width: 56px; height: 56px; font-size: 22px; }
+            .logo-section h2 { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-wrapper">
+    <div class="login-card">
+
+        <div class="logo-section">
+            <div class="logo-icon"><i class="bi bi-pass"></i></div>
+            <h2>Employee OutPass</h2>
+            <p>Sign in to your account</p>
+        </div>
+
+        <div th:if="${error}" class="alert-danger" role="alert">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <span th:text="${error}">Invalid username or password!</span>
+        </div>
+
+        <form th:action="@{/login}" method="post">
+            <div class="form-group">
+                <label for="username"><i class="bi bi-person"></i> Username</label>
+                <input type="text" id="username" name="username" class="form-control"
+                       placeholder="Enter your username" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="password"><i class="bi bi-lock"></i> Password</label>
+                <div class="input-group">
+                    <input type="password" id="password" name="password" class="form-control"
+                           placeholder="Enter your password" required>
+                    <button type="button" class="password-toggle" onclick="togglePassword()">
+                        <i class="bi bi-eye" id="toggleIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login">
+                <i class="bi bi-box-arrow-in-right"></i> Sign In
+            </button>
+        </form>
+
+        <!-- Professional Role Badges -->
+        <div class="roles-section">
+            <span class="role-pill admin">ADMIN</span>
+            <span class="role-pill hod">HOD</span>
+            <span class="role-pill hr">HR</span>
+            <span class="role-pill employee">EMPLOYEE</span>
+            <span class="role-pill security">SECURITY</span>
+        </div>
+
+    </div>
+
+    <div class="login-footer">
+        &copy; 2026 Employee OutPass System. All rights reserved.
+    </div>
+</div>
+
+<script>
+    function togglePassword() {
+        var passwordInput = document.getElementById('password');
+        var toggleIcon = document.getElementById('toggleIcon');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.className = 'bi bi-eye-slash';
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.className = 'bi bi-eye';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var alert = document.querySelector('.alert-danger');
+        if (alert) {
+            setTimeout(function() { alert.style.display = 'none'; }, 5000);
+        }
+    });
+</script>
+
+</body>
+</html>

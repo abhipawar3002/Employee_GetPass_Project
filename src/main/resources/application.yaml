@@ -1,0 +1,3 @@
+spring:
+  application:
+    name: Employee_OutPass_Project

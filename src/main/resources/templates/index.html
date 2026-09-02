@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABtech - Employee OutPass System</title>
+
+    <!-- ===== ABtech Favicon ===== -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2317365d'/%3E%3Ctext x='50' y='70' font-size='50' font-weight='900' font-family='Arial' text-anchor='middle' fill='%23ffc107'%3EAB%3C/text%3E%3C/svg%3E">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        /* ===== ABtech Logo CSS ===== */
+        .ab-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+        }
+        .ab-logo .logo-text {
+            font-size: 28px;
+            font-weight: 900;
+            color: white;
+            letter-spacing: 1px;
+            line-height: 1;
+        }
+        .ab-logo .logo-text .highlight {
+            color: #ffc107;
+        }
+        .ab-logo .logo-tagline {
+            font-size: 8px;
+            letter-spacing: 4px;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+        .ab-logo-dark .logo-text {
+            color: #17365d;
+        }
+        .ab-logo-dark .logo-tagline {
+            color: rgba(0, 0, 0, 0.3);
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar-custom {
+            background: linear-gradient(135deg, #0f1a30 0%, #1a2d4a 50%, #17365d 100%);
+            padding: 15px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .navbar-custom .navbar-brand {
+            font-weight: 800;
+            font-size: 24px;
+            color: white !important;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .navbar-custom .navbar-brand .brand-sub {
+            font-size: 8px;
+            letter-spacing: 4px;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            margin-top: 1px;
+        }
+        .navbar-custom .navbar-brand i {
+            color: #ffc107;
+            margin-right: 10px;
+        }
+        .navbar-custom .nav-link {
+            color: rgba(255,255,255,0.7) !important;
+            font-weight: 500;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        .navbar-custom .nav-link:hover {
+            color: #ffc107 !important;
+        }
+        .navbar-custom .btn-login {
+            background: #ffc107;
+            color: #17365d !important;
+            font-weight: 700;
+            padding: 8px 25px;
+            border-radius: 30px;
+            transition: all 0.3s;
+        }
+        .navbar-custom .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255,193,7,0.3);
+            color: #17365d !important;
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero-section {
+            background: linear-gradient(135deg, #0f1a30 0%, #1a2d4a 40%, #17365d 100%);
+            padding: 80px 0 100px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            background: rgba(255,193,7,0.05);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,193,7,0.03);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .hero-section .hero-title {
+            font-size: 48px;
+            font-weight: 900;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+        .hero-section .hero-title span {
+            color: #ffc107;
+        }
+        .hero-section .hero-subtitle {
+            font-size: 18px;
+            opacity: 0.8;
+            margin-bottom: 30px;
+            max-width: 600px;
+        }
+        .hero-section .btn-get-started {
+            background: #ffc107;
+            color: #17365d;
+            font-weight: 700;
+            padding: 14px 40px;
+            border-radius: 30px;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .hero-section .btn-get-started:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255,193,7,0.3);
+            color: #17365d;
+        }
+        .hero-section .btn-learn-more {
+            background: transparent;
+            color: white;
+            font-weight: 600;
+            padding: 14px 30px;
+            border-radius: 30px;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            border: 2px solid rgba(255,255,255,0.2);
+            margin-left: 10px;
+        }
+        .hero-section .btn-learn-more:hover {
+            border-color: #ffc107;
+            color: #ffc107;
+        }
+        .hero-stats {
+            margin-top: 50px;
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        .hero-stats .stat-item {
+            text-align: center;
+        }
+        .hero-stats .stat-item .number {
+            font-size: 32px;
+            font-weight: 800;
+            color: #ffc107;
+        }
+        .hero-stats .stat-item .label {
+            font-size: 14px;
+            opacity: 0.6;
+        }
+
+        /* ===== HERO LOGO ===== */
+        .hero-logo {
+            text-align: center;
+            padding: 30px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .hero-logo .big-logo {
+            font-size: 80px;
+            font-weight: 900;
+            color: white;
+            letter-spacing: 2px;
+        }
+        .hero-logo .big-logo span {
+            color: #ffc107;
+        }
+        .hero-logo .big-tagline {
+            font-size: 14px;
+            letter-spacing: 8px;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+        .hero-logo .big-sub {
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+            margin-top: 15px;
+        }
+        .hero-logo .badge-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .hero-logo .badge-container .badge {
+            padding: 5px 15px;
+            font-size: 11px;
+        }
+
+        /* ===== FEATURES ===== */
+        .features-section {
+            padding: 80px 0;
+            background: white;
+        }
+        .features-section .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .features-section .section-title h2 {
+            font-weight: 800;
+            color: #17365d;
+            font-size: 36px;
+        }
+        .features-section .section-title p {
+            color: #888;
+            font-size: 16px;
+        }
+        .feature-card {
+            padding: 30px 25px;
+            border-radius: 16px;
+            background: #f8f9fa;
+            transition: all 0.3s;
+            text-align: center;
+            height: 100%;
+            border: 1px solid #e9ecef;
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+            border-color: #ffc107;
+        }
+        .feature-card .icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 15px;
+        }
+        .feature-card .icon.blue { background: #e8edf5; color: #17365d; }
+        .feature-card .icon.green { background: #d4edda; color: #28a745; }
+        .feature-card .icon.yellow { background: #fff3cd; color: #ffc107; }
+        .feature-card .icon.red { background: #f8d7da; color: #dc3545; }
+        .feature-card .icon.purple { background: #e8d5f5; color: #7b1fa2; }
+        .feature-card .icon.teal { background: #d1ecf1; color: #17a2b8; }
+        .feature-card h5 {
+            font-weight: 700;
+            color: #17365d;
+            margin-bottom: 10px;
+        }
+        .feature-card p {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+
+        /* ===== ROLES ===== */
+        .roles-section {
+            padding: 80px 0;
+            background: #f8f9fa;
+        }
+        .roles-section .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .roles-section .section-title h2 {
+            font-weight: 800;
+            color: #17365d;
+            font-size: 36px;
+        }
+        .roles-section .section-title p {
+            color: #888;
+            font-size: 16px;
+        }
+        .role-card {
+            padding: 30px 25px;
+            border-radius: 16px;
+            background: white;
+            transition: all 0.3s;
+            text-align: center;
+            height: 100%;
+            border: 2px solid #e9ecef;
+            position: relative;
+            overflow: hidden;
+        }
+        .role-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+        .role-card .role-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .role-card .role-badge.admin { background: #dc3545; color: white; }
+        .role-card .role-badge.hod { background: #ffc107; color: #333; }
+        .role-card .role-badge.hr { background: #17a2b8; color: white; }
+        .role-card .role-badge.employee { background: #28a745; color: white; }
+        .role-card .role-badge.security { background: #6c757d; color: white; }
+        .role-card .icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin: 0 auto 15px;
+        }
+        .role-card .icon.admin { background: #f8d7da; color: #dc3545; }
+        .role-card .icon.hod { background: #fff3cd; color: #ffc107; }
+        .role-card .icon.hr { background: #d1ecf1; color: #17a2b8; }
+        .role-card .icon.employee { background: #d4edda; color: #28a745; }
+        .role-card .icon.security { background: #e9ecef; color: #6c757d; }
+        .role-card h5 {
+            font-weight: 700;
+            color: #17365d;
+            margin-bottom: 8px;
+        }
+        .role-card p {
+            color: #888;
+            font-size: 13px;
+            margin-bottom: 0;
+        }
+        .role-card .permissions {
+            margin-top: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+        }
+        .role-card .permissions .perm {
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            background: #f0f4f8;
+            color: #555;
+        }
+        .role-card .permissions .perm.yes { background: #d4edda; color: #28a745; }
+        .role-card .permissions .perm.no { background: #f8d7da; color: #dc3545; }
+
+        /* ===== STATS ===== */
+        .stats-section {
+            padding: 60px 0;
+            background: linear-gradient(135deg, #0f1a30 0%, #17365d 100%);
+            color: white;
+        }
+        .stats-section .stat-number {
+            font-size: 40px;
+            font-weight: 900;
+            color: #ffc107;
+        }
+        .stats-section .stat-label {
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        /* ===== WORKFLOW ===== */
+        .workflow-section {
+            padding: 80px 0;
+            background: white;
+        }
+        .workflow-section .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .workflow-section .section-title h2 {
+            font-weight: 800;
+            color: #17365d;
+            font-size: 36px;
+        }
+        .workflow-step {
+            text-align: center;
+            position: relative;
+        }
+        .workflow-step .step-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #ffc107;
+            color: #17365d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 800;
+            margin: 0 auto 15px;
+        }
+        .workflow-step h5 {
+            font-weight: 700;
+            color: #17365d;
+        }
+        .workflow-step p {
+            color: #888;
+            font-size: 14px;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: #0f1a30;
+            color: rgba(255,255,255,0.6);
+            padding: 40px 0 20px;
+        }
+        .footer .footer-logo .logo-text {
+            font-size: 24px;
+            font-weight: 900;
+            color: white;
+        }
+        .footer .footer-logo .logo-text .highlight {
+            color: #ffc107;
+        }
+        .footer .footer-logo .logo-tagline {
+            font-size: 8px;
+            letter-spacing: 4px;
+            color: rgba(255,255,255,0.3);
+            text-transform: uppercase;
+        }
+        .footer h5 {
+            color: white;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        .footer a {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            transition: all 0.3s;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .footer a:hover {
+            color: #ffc107;
+        }
+        .footer .social-icons a {
+            display: inline-block;
+            margin-right: 15px;
+            font-size: 20px;
+        }
+        .footer .copyright {
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 20px;
+            margin-top: 30px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 992px) {
+            .hero-section .hero-title { font-size: 36px; }
+            .hero-section .hero-subtitle { font-size: 16px; }
+            .hero-stats { gap: 20px; }
+            .hero-stats .stat-item .number { font-size: 24px; }
+        }
+        @media (max-width: 768px) {
+            .hero-section { padding: 60px 0 80px; }
+            .hero-section .hero-title { font-size: 28px; }
+            .hero-section .btn-get-started, .hero-section .btn-learn-more {
+                display: block;
+                text-align: center;
+                margin: 10px 0;
+            }
+            .hero-section .btn-learn-more { margin-left: 0; }
+            .features-section .section-title h2 { font-size: 28px; }
+            .roles-section .section-title h2 { font-size: 28px; }
+            .stats-section .stat-number { font-size: 30px; }
+            .hero-logo .big-logo { font-size: 50px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar navbar-expand-lg navbar-custom">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <div style="display: flex; flex-direction: column;">
+                <span style="font-size: 24px; font-weight: 900; color: white; letter-spacing: 1px;">
+                    AB<span style="color: #ffc107;">tech</span>
+                </span>
+                <span style="font-size: 8px; letter-spacing: 4px; color: rgba(255, 255, 255, 0.4); text-transform: uppercase; margin-top: 1px;">
+                    BUILD • CODE • GROW
+                </span>
+            </div>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+                <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+                <li class="nav-item"><a class="nav-link" href="#roles">Roles</a></li>
+                <li class="nav-item"><a class="nav-link" href="#workflow">How It Works</a></li>
+                <li class="nav-item"><a class="nav-link" href="/login" style="color: #ffc107 !important;"><i class="bi bi-box-arrow-in-right"></i> Login</a></li>
+                <li class="nav-item ms-2"><a class="nav-link btn-login" href="/login">Get Started</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- ===== HERO SECTION ===== -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <h1 class="hero-title">
+                    Streamline Your <br><span>Gate Pass Management</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Employee OutPass System helps organizations manage employee gate passes
+                    efficiently with role-based access control, approval workflows, and real-time tracking.
+                </p>
+                <div>
+                    <a href="/login" class="btn-get-started">
+                        <i class="bi bi-rocket-takeoff"></i> Get Started
+                    </a>
+                    <a href="#features" class="btn-learn-more">
+                        <i class="bi bi-info-circle"></i> Learn More
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="number">500+</div>
+                        <div class="label">Requests Processed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number">98%</div>
+                        <div class="label">Approval Rate</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number">24/7</div>
+                        <div class="label">System Availability</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block">
+                <div class="hero-logo">
+                    <div class="big-logo">
+                        AB<span>tech</span>
+                    </div>
+                    <div class="big-tagline">
+                        BUILD • CODE • GROW
+                    </div>
+                    <div class="big-sub">
+                        Employee OutPass System
+                    </div>
+                    <div class="badge-container">
+                        <span class="badge bg-success">Secure</span>
+                        <span class="badge bg-info">Efficient</span>
+                        <span class="badge bg-warning text-dark">Smart</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== FEATURES SECTION ===== -->
+<section class="features-section" id="features">
+    <div class="container">
+        <div class="section-title">
+            <h2>Why Choose <span style="color: #ffc107;">ABtech</span>?</h2>
+            <p>Powerful features designed to streamline your employee gate pass management</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon blue"><i class="bi bi-shield-lock"></i></div>
+                    <h5>Secure Authentication</h5>
+                    <p>Role-based access control with secure login for all users</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon green"><i class="bi bi-clock-history"></i></div>
+                    <h5>Real-time Tracking</h5>
+                    <p>Track request status in real-time from application to approval</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon yellow"><i class="bi bi-people"></i></div>
+                    <h5>Multi-Role Support</h5>
+                    <p>Admin, HOD, HR, Security, and Employee roles with specific permissions</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon red"><i class="bi bi-check2-circle"></i></div>
+                    <h5>Approval Workflow</h5>
+                    <p>Seamless HOD, HR, and Security approval chain for every request</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon purple"><i class="bi bi-printer"></i></div>
+                    <h5>Gate Pass Printing</h5>
+                    <p>Print authorized gate passes with all employee details</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon teal"><i class="bi bi-bar-chart"></i></div>
+                    <h5>Analytics Dashboard</h5>
+                    <p>View statistics on total requests, approvals, and rejections</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== ROLES SECTION ===== -->
+<section class="roles-section" id="roles">
+    <div class="container">
+        <div class="section-title">
+            <h2>Role-Based <span style="color: #ffc107;">Access</span></h2>
+            <p>Each role has specific permissions designed for their responsibilities</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-2-4 col-lg-2">
+                <div class="role-card">
+                    <span class="role-badge admin">ADMIN</span>
+                    <div class="icon admin"><i class="bi bi-person-gear"></i></div>
+                    <h5>Admin</h5>
+                    <p>Full system access & management</p>
+                    <div class="permissions">
+                        <span class="perm yes">Manage Users</span>
+                        <span class="perm yes">Manage Depts</span>
+                        <span class="perm yes">All Requests</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2-4 col-lg-2">
+                <div class="role-card">
+                    <span class="role-badge hod">HOD</span>
+                    <div class="icon hod"><i class="bi bi-person-badge"></i></div>
+                    <h5>HOD</h5>
+                    <p>Department Head authorization</p>
+                    <div class="permissions">
+                        <span class="perm yes">Approve/Reject</span>
+                        <span class="perm yes">View Department</span>
+                        <span class="perm no">Manage Users</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2-4 col-lg-2">
+                <div class="role-card">
+                    <span class="role-badge hr">HR</span>
+                    <div class="icon hr"><i class="bi bi-person-heart"></i></div>
+                    <h5>HR</h5>
+                    <p>Human Resources approval</p>
+                    <div class="permissions">
+                        <span class="perm yes">Approve/Reject</span>
+                        <span class="perm yes">View All</span>
+                        <span class="perm no">Manage Users</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2-4 col-lg-2">
+                <div class="role-card">
+                    <span class="role-badge employee">EMPLOYEE</span>
+                    <div class="icon employee"><i class="bi bi-person"></i></div>
+                    <h5>Employee</h5>
+                    <p>Apply for out passes</p>
+                    <div class="permissions">
+                        <span class="perm yes">Apply Requests</span>
+                        <span class="perm yes">View Status</span>
+                        <span class="perm no">Approve</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2-4 col-lg-2">
+                <div class="role-card">
+                    <span class="role-badge security">SECURITY</span>
+                    <div class="icon security"><i class="bi bi-shield"></i></div>
+                    <h5>Security</h5>
+                    <p>Gate pass verification</p>
+                    <div class="permissions">
+                        <span class="perm yes">View Requests</span>
+                        <span class="perm yes">Verify Pass</span>
+                        <span class="perm no">Approve/Reject</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== WORKFLOW SECTION ===== -->
+<section class="workflow-section" id="workflow">
+    <div class="container">
+        <div class="section-title">
+            <h2>How It <span style="color: #ffc107;">Works</span></h2>
+            <p>Simple 4-step workflow from application to gate pass</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="workflow-step">
+                    <div class="step-number">1</div>
+                    <h5>Employee Applies</h5>
+                    <p>Employee submits out pass request with details</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="workflow-step">
+                    <div class="step-number">2</div>
+                    <h5>HOD Approves</h5>
+                    <p>Department Head reviews and approves/rejects</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="workflow-step">
+                    <div class="step-number">3</div>
+                    <h5>HR Verifies</h5>
+                    <p>HR verifies the request and approves</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="workflow-step">
+                    <div class="step-number">4</div>
+                    <h5>Security Checks</h5>
+                    <p>Security verifies the authorized gate pass</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== STATS SECTION ===== -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3">
+                <div class="stat-number" id="stat1">0</div>
+                <div class="stat-label">Total Requests</div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-number" id="stat2">0</div>
+                <div class="stat-label">Active Users</div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-number" id="stat3">0</div>
+                <div class="stat-label">Departments</div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-number" id="stat4">0</div>
+                <div class="stat-label">Authorized Passes</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="footer-logo">
+                    <div style="font-size: 24px; font-weight: 900; color: white;">
+                        AB<span style="color: #ffc107;">tech</span>
+                    </div>
+                    <div style="font-size: 8px; letter-spacing: 4px; color: rgba(255, 255, 255, 0.3); text-transform: uppercase;">
+                        BUILD • CODE • GROW
+                    </div>
+                    <p style="font-size: 14px; max-width: 300px; margin-top: 10px;">
+                        Employee OutPass System - Streamlining gate pass management with
+                        role-based access control and approval workflows.
+                    </p>
+                </div>
+                <div class="social-icons">
+                    <a href="#"><i class="bi bi-facebook"></i></a>
+                    <a href="#"><i class="bi bi-twitter-x"></i></a>
+                    <a href="#"><i class="bi bi-linkedin"></i></a>
+                    <a href="#"><i class="bi bi-youtube"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 mb-4">
+                <h5>Quick Links</h5>
+                <a href="/login">Login</a>
+                <a href="#features">Features</a>
+                <a href="#roles">Roles</a>
+                <a href="#workflow">How It Works</a>
+            </div>
+            <div class="col-lg-3 col-md-4 mb-4">
+                <h5>Roles</h5>
+                <a href="#">Admin</a>
+                <a href="#">HOD</a>
+                <a href="#">HR</a>
+                <a href="#">Employee</a>
+                <a href="#">Security</a>
+            </div>
+            <div class="col-lg-3 col-md-4 mb-4">
+                <h5>Contact</h5>
+                <p style="font-size: 14px;"><i class="bi bi-envelope"></i> support@abtech.com</p>
+                <p style="font-size: 14px;"><i class="bi bi-phone"></i> +1 (555) 123-4567</p>
+                <p style="font-size: 14px;"><i class="bi bi-geo-alt"></i> 123 Tech Park, Silicon Valley</p>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2026 <strong>ABtech</strong>. All rights reserved. | Made with <i class="bi bi-heart-fill" style="color: #ffc107;"></i>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Animated counter for stats
+    document.addEventListener('DOMContentLoaded', function() {
+        function animateCounter(elementId, target, duration) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            let start = 0;
+            const increment = Math.ceil(target / 60);
+
+            const timer = setInterval(function() {
+                start += increment;
+                if (start >= target) {
+                    start = target;
+                    clearInterval(timer);
+                }
+                element.textContent = start.toLocaleString();
+            }, duration / 60);
+        }
+
+        // Animate stats
+        setTimeout(function() {
+            animateCounter('stat1', 500, 2000);
+            animateCounter('stat2', 150, 2000);
+            animateCounter('stat3', 12, 2000);
+            animateCounter('stat4', 380, 2000);
+        }, 500);
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
