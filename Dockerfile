@@ -1,21 +1,27 @@
-# Build stage
-FROM maven:3.8.4-openjdk-17-slim AS build
+# ===== BUILD STAGE =====
+FROM maven:3.9.4-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Copy pom.xml and download dependencies
+# Copy pom.xml first for dependency caching
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# Copy source and build
+# Copy source code and build
 COPY src src
 RUN mvn clean package -DskipTests
 
-# Run stage
-FROM openjdk:17-alpine
+# ===== RUN STAGE =====
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
+# Create non-root user for security
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
 # Copy JAR from build stage
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build --chown=appuser:appgroup /app/target/*.jar app.jar
+
+# Switch to non-root user
+USER appuser
 
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
