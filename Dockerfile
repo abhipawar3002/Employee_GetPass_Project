@@ -10,8 +10,8 @@ RUN mvn dependency:go-offline -B
 COPY src src
 RUN mvn clean package -DskipTests
 
-# Run stage - Use Alpine (smaller image)
-FROM eclipse-temurin:17-alpine
+# Run stage
+FROM openjdk:17-alpine
 WORKDIR /app
 
 # Copy JAR from build stage
